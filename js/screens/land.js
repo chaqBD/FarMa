@@ -187,7 +187,12 @@ export function landScreen(state, navigate) {
     screen.appendChild(navBar("land", navigate));
 
     if (state.land.length === 0) {
-      screen.appendChild(el("p", { class: "muted" }, ["You don't have any land yet. Lease a package to get started."]));
+      screen.appendChild(
+        el("div", { class: "empty-land-banner" }, [
+          el("img", { src: "images/scenes/empty-land.jpg", alt: "An illustration of a small farm plot", width: "160", height: "160" }),
+          el("p", { class: "muted" }, ["You don't have any land yet. Lease a package to get started."]),
+        ])
+      );
       screen.appendChild(renderLeaseOptions());
       return;
     }

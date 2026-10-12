@@ -1,4 +1,4 @@
-import { el, formatNaira, toast, icon } from "../ui.js";
+import { el, formatNaira, toast, icon, avatarSrc } from "../ui.js";
 import { BACKGROUNDS } from "../data.js";
 import { newGameState, saveGame } from "../state.js";
 
@@ -16,7 +16,17 @@ export function playerCreationScreen(onComplete) {
   const nameInput = el("input", { type: "text", placeholder: "e.g. Bisi Adewale", maxlength: "40" });
   const farmNameInput = el("input", { type: "text", placeholder: "e.g. Golden Harvest Agro Ventures", maxlength: "40" });
 
-  const genderSelect = el("select", {}, [
+  const avatarPreview = el("img", {
+    class: "avatar-preview",
+    src: avatarSrc("Woman"),
+    alt: "Your farmer avatar",
+    width: "96",
+    height: "96",
+  });
+
+  const genderSelect = el("select", {
+    onChange: () => { avatarPreview.src = avatarSrc(genderSelect.value); },
+  }, [
     el("option", { value: "Woman" }, ["Woman"]),
     el("option", { value: "Man" }, ["Man"]),
   ]);
@@ -89,9 +99,12 @@ export function playerCreationScreen(onComplete) {
 
   return el("div", { class: "screen player-creation" }, [
     hero,
-    el("section", { class: "form-row" }, [
-      el("label", {}, ["Your name", nameInput]),
-      el("label", {}, ["Gender", genderSelect]),
+    el("section", { class: "avatar-row" }, [
+      avatarPreview,
+      el("div", { class: "form-row avatar-fields" }, [
+        el("label", {}, ["Your name", nameInput]),
+        el("label", {}, ["Gender", genderSelect]),
+      ]),
     ]),
     el("section", { class: "form-row" }, [
       el("label", {}, ["Home state", stateSelect]),

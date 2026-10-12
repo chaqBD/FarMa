@@ -1,4 +1,4 @@
-import { el, formatNaira, showEventModal, icon } from "../ui.js";
+import { el, formatNaira, showEventModal, avatarSrc } from "../ui.js";
 import { advanceDay, describeDate } from "../engine.js";
 import { clearSave, saveGame, STAT_LABELS, pushLog } from "../state.js";
 import { resolveEventChoice } from "../events.js";
@@ -34,7 +34,7 @@ export function dashboardScreen(state, navigate) {
 
     const header = el("header", { class: "dash-header" }, [
       el("div", { class: "card-title-row" }, [
-        icon("logo", 36),
+        el("img", { class: "avatar-badge", src: avatarSrc(state.player.gender), alt: state.player.name, width: "44", height: "44" }),
         el("div", {}, [
           el("h1", {}, [state.player.farmName]),
           el("p", { class: "subtitle" }, [

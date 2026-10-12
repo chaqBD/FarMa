@@ -20,6 +20,11 @@ export function el(tag, props = {}, children = []) {
   return node;
 }
 
+/** Path to the player's avatar portrait, matched to their chosen gender. */
+export function avatarSrc(gender) {
+  return gender === "Man" ? "images/avatars/man.jpg" : "images/avatars/woman.jpg";
+}
+
 /** A small inline-SVG icon badge; see js/icons.js for the available names. */
 export function icon(name, size = 28) {
   return el("span", { class: "icon", style: `width:${size}px;height:${size}px`, html: iconHtml(name) });

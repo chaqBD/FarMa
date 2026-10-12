@@ -24,23 +24,40 @@ export function isEmbeddedInLagosLife() {
   return initResult !== null;
 }
 
-export async function initVatar() {
-  if (initResult !== null) return initResult;
-  if (!isVatarAvailable()) return null;
-  try {
-    const { player, mode } = await window.Vatar.init();
-    initResult = { player, mode };
-    // Catches a purchase that was confirmed while the player was away
-    // (e.g. they left to pay on the provider's page and the game reloaded).
-    window.Vatar.onPurchase((p) => {
-      if (p.productId !== PRODUCT_ID) return;
-      claimPurchase(p.purchaseId).catch((err) => console.warn("claimPurchase (onPurchase) failed:", err));
-    });
-    return initResult;
-  } catch (err) {
-    console.warn("Vatar.init() unavailable:", err?.code || err);
-    return null;
-  }
+let initPromise = null; // in-flight dedup, separate from initResult (the settled cache)
+
+/**
+ * Calls Vatar.init(), exactly once no matter how many places call this
+ * concurrently — concurrent callers share the same in-flight promise
+ * instead of each starting a real Vatar.init() call (which would also
+ * each register their own onPurchase listener, double-handling the next
+ * purchase confirmation). Resets after a failure so a later legitimate
+ * retry can start a fresh attempt.
+ */
+export function initVatar() {
+  if (initResult !== null) return Promise.resolve(initResult);
+  if (!isVatarAvailable()) return Promise.resolve(null);
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    try {
+      const { player, mode } = await window.Vatar.init();
+      initResult = { player, mode };
+      // Catches a purchase that was confirmed while the player was away
+      // (e.g. they left to pay on the provider's page and the game reloaded).
+      window.Vatar.onPurchase((p) => {
+        if (p.productId !== PRODUCT_ID) return;
+        claimPurchase(p.purchaseId).catch((err) => console.warn("claimPurchase (onPurchase) failed:", err));
+      });
+      return initResult;
+    } catch (err) {
+      console.warn("Vatar.init() unavailable:", err?.code || err);
+      return null;
+    } finally {
+      initPromise = null;
+    }
+  })();
+  return initPromise;
 }
 
 export function getPlayer() {
@@ -151,7 +168,7 @@ export async function restoreInterruptedPurchases() {
  * callers own saving/logging/redrawing, since those are app concerns
  * this module otherwise stays free of. Returns whether it changed.
  */
-export async function syncPremiumFromVatar(state) {
+async function syncPremiumFromVatar(state) {
   await restoreInterruptedPurchases();
   const { available, premium } = await checkPremiumEntitlement();
   if (!available || premium === state.premium) return false;
@@ -159,25 +176,39 @@ export async function syncPremiumFromVatar(state) {
   return true;
 }
 
-let retryAttempted = false;
+let syncPromise = null; // dedups the whole init-then-sync flow, same reasoning as initPromise above
 
 /**
- * If the one startup initVatar() attempt (see main.js's start()) failed,
- * allows exactly one retry for the rest of the session — initVatar()
- * itself only caches on success, so a transient handshake hiccup is
- * safely retryable. Session-wide, not per-screen-instance: a host that
- * can never embed (e.g. the standalone GitHub Pages link, which still
- * loads the SDK script and so passes isVatarAvailable()) only ever pays
- * for one extra failed attempt total, not one on every Bank screen visit.
- * Returns null when there was nothing to do (already known, already
- * retried, or no SDK script present) — callers should only redraw when
- * they get a real result back.
+ * The one entry point for "make sure Vatar is initialized and, if
+ * embedded, that state.premium reflects reality" — safe to call from
+ * multiple places (main.js at startup, the Bank screen on every render)
+ * without duplicating work or racing: every caller *during the same
+ * attempt* shares the same in-flight promise, so the entitlement sync
+ * that follows a successful init happens exactly once regardless of how
+ * many places call this concurrently. Returns { embedded, premiumChanged }.
+ *
+ * A failed attempt is deliberately *not* cached permanently — each call
+ * after a failure starts a fresh attempt (initVatar() itself only
+ * resets its own in-flight guard on failure too, so this stays
+ * consistent with it), rather than remembering a stale "never embedded"
+ * answer that a later, legitimately-embedded sync could get stuck
+ * behind. The cost is one extra harmless attempt per Bank screen visit
+ * on a host that can never embed (e.g. the standalone GitHub Pages
+ * link) — bounded by the player's own navigation, not a loop, and
+ * worth it to never leave a real purchase unsynced for the rest of a
+ * session over one slow handshake.
  */
-export async function retryInitIfNeeded(state) {
-  if (isEmbeddedInLagosLife() || retryAttempted || !isVatarAvailable()) return null;
-  retryAttempted = true;
-  const info = await initVatar();
-  if (!info) return null;
-  const premiumChanged = await syncPremiumFromVatar(state);
-  return { premiumChanged };
+export function ensureVatarSynced(state) {
+  if (!syncPromise) {
+    syncPromise = (async () => {
+      const info = await initVatar();
+      if (!info) {
+        syncPromise = null;
+        return { embedded: false, premiumChanged: false };
+      }
+      const premiumChanged = await syncPremiumFromVatar(state);
+      return { embedded: true, premiumChanged };
+    })();
+  }
+  return syncPromise;
 }

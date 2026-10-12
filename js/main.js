@@ -7,7 +7,7 @@ import { landScreen } from "./screens/land.js";
 import { marketScreen } from "./screens/market.js";
 import { bankScreen } from "./screens/bank.js";
 import { workersScreen } from "./screens/workers.js";
-import { initVatar, syncPremiumFromVatar } from "./vatar.js";
+import { ensureVatarSynced } from "./vatar.js";
 
 const SCREENS = {
   home: dashboardScreen,
@@ -19,12 +19,11 @@ const SCREENS = {
 
 let currentScreenId = "home";
 
-// How long start() waits for an embedded Vatar handshake before giving up
-// on it for *first render only* and proceeding as if standalone. The real
-// initVatar() call keeps running after this — if it resolves late,
-// initVatar() still caches the result, so isEmbeddedInLagosLife() picks
-// it up correctly from then on (and the Bank screen's own retry can
-// still pick up a case this timeout causes to be missed).
+// How long start() waits for an embedded Vatar handshake (for a returning
+// player, see start() below) before giving up on it for *first render
+// only* and proceeding as if standalone. ensureVatarSynced() keeps
+// running after this — if it resolves late, the Bank screen's own call
+// to it (same shared in-flight/settled attempt) still picks it up.
 const VATAR_INIT_TIMEOUT_MS = 6000;
 
 function withTimeout(promise, ms, fallbackValue) {
@@ -38,52 +37,39 @@ function showScreen(state, screenId) {
   render(screenFn(state, navigate));
 }
 
-/**
- * Restores any interrupted purchase and syncs Premium Pass status from
- * Vatar, in the background after the game has already rendered. Only
- * redraws if state.premium actually changed — a full redraw tears down
- * and rebuilds the current screen's DOM (render() does innerHTML = ""),
- * which would risk wiping in-progress form input or colliding with an
- * in-flight purchase click if it fired more freely. This never touches
- * isEmbeddedInLagosLife()'s *display* correctness, because — unlike an
- * earlier version of this function — that's no longer decided late: see
- * start(), which awaits initVatar() before the very first render, so
- * every screen's first paint already reflects the right embed status
- * with no race to patch up here.
- */
-async function syncPremiumStatus(state, vatarInfo) {
-  if (!vatarInfo) return;
-
-  const changed = await syncPremiumFromVatar(state);
-  if (!changed) return;
-
+function applyPremiumChange(state) {
   if (state.premium) pushLog(state, "Premium Pass unlocked! ✨");
   saveGame(state);
-  showScreen(state, currentScreenId);
 }
 
 async function start() {
   await loadData();
 
-  // Standalone play (the common case — no window.Vatar at all) resolves
-  // this instantly, so first paint is never delayed for it. Only an
-  // embedded session waits here, for the handshake with the Lagos Life
-  // frame — worth it so every screen's first render already knows
-  // whether it's embedded, instead of guessing standalone and
-  // correcting itself a moment later. Capped so a handshake that never
-  // settles (dropped postMessage, unresponsive parent frame) can't hang
-  // the whole app — proceeds as standalone for first render either way.
-  const vatarInfo = await withTimeout(initVatar(), VATAR_INIT_TIMEOUT_MS, null);
-
   const existingSave = loadGame();
   if (existingSave) {
+    // Returning player: worth waiting for (capped) before first render,
+    // so Bank's first paint already reflects the right embed/premium
+    // status instead of guessing standalone and correcting itself a
+    // moment later.
+    const result = await withTimeout(ensureVatarSynced(existingSave), VATAR_INIT_TIMEOUT_MS, null);
+    if (result?.premiumChanged) applyPremiumChange(existingSave);
     showScreen(existingSave, "home");
-    syncPremiumStatus(existingSave, vatarInfo).catch((err) => console.warn("Premium sync failed:", err));
   } else {
+    // New player: there's no state to sync until character creation
+    // completes, so this can only ever happen after first render. The
+    // Bank screen's own ensureVatarSynced() call (the same shared
+    // attempt) covers the rare case of a returning Vatar player who
+    // already owns the pass starting a fresh local save.
     render(
       playerCreationScreen((state) => {
         showScreen(state, "home");
-        syncPremiumStatus(state, vatarInfo).catch((err) => console.warn("Premium sync failed:", err));
+        withTimeout(ensureVatarSynced(state), VATAR_INIT_TIMEOUT_MS, null)
+          .then((result) => {
+            if (!result?.premiumChanged) return;
+            applyPremiumChange(state);
+            showScreen(state, currentScreenId);
+          })
+          .catch((err) => console.warn("Premium sync failed:", err));
       })
     );
   }

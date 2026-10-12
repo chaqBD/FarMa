@@ -1,7 +1,7 @@
 import { el, formatNaira, toast, icon } from "../ui.js";
 import { totals } from "../finance.js";
 import { saveGame, pushLog } from "../state.js";
-import { isEmbeddedInLagosLife, retryInitIfNeeded, purchasePremium } from "../vatar.js";
+import { isEmbeddedInLagosLife, ensureVatarSynced, purchasePremium } from "../vatar.js";
 import { navBar } from "./nav.js";
 
 const TYPE_LABELS = {
@@ -30,15 +30,21 @@ export function bankScreen(state, navigate) {
     navigate(nextId);
   };
 
-  // retryInitIfNeeded() guards its own one-retry-per-session limit (see
-  // js/vatar.js) and syncs Premium ownership too if the retry succeeds —
-  // retryInFlight here just stops this screen instance from firing it
-  // more than once while the first call is still pending.
-  function maybeRetryInit() {
+  // ensureVatarSynced() dedups against any other in-flight/settled attempt
+  // this session (including main.js's own startup call) and syncs Premium
+  // ownership as part of the same attempt — retryInFlight here just stops
+  // this screen instance from awaiting it more than once concurrently.
+  function maybeSync() {
     if (retryInFlight) return;
     retryInFlight = true;
-    retryInitIfNeeded(state).then((result) => {
-      if (!result) return;
+    ensureVatarSynced(state).then((result) => {
+      retryInFlight = false;
+      // embedded:false means standalone or a failed attempt — nothing
+      // changed, so skip the redraw entirely. Redrawing here would
+      // re-invoke renderPremiumCard(), which calls maybeSync() again
+      // whenever still not embedded: on a genuinely standalone host,
+      // that's an infinite sync-then-redraw loop, not a bounded retry.
+      if (!result?.embedded) return;
       if (result.premiumChanged) {
         pushLog(state, "Premium Pass unlocked! ✨");
         saveGame(state);
@@ -61,7 +67,7 @@ export function bankScreen(state, navigate) {
     ];
 
     if (!isEmbeddedInLagosLife()) {
-      maybeRetryInit();
+      maybeSync();
       body.push(el("p", { class: "muted" }, ["Open FaRma inside Lagos Life to buy the Premium Pass."]));
     } else {
       body.push(

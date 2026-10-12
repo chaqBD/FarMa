@@ -17,6 +17,12 @@ const SCREENS = {
   workers: workersScreen,
 };
 
+// Screens whose own rendering reads isEmbeddedInLagosLife() (not just
+// state.premium) — currently just Bank. A screen added here must also
+// have no risky in-progress form state, since syncPremiumStatus's redraw
+// fully tears down and rebuilds the screen's DOM.
+const SCREENS_READING_EMBED_STATUS = new Set(["bank"]);
+
 let currentScreenId = "home";
 
 function showScreen(state, screenId) {
@@ -57,7 +63,7 @@ async function syncPremiumStatus(state) {
     premiumChanged = true;
   }
 
-  if (!premiumChanged && currentScreenId !== "bank") return;
+  if (!premiumChanged && !SCREENS_READING_EMBED_STATUS.has(currentScreenId)) return;
   showScreen(state, currentScreenId);
 }
 

@@ -86,8 +86,15 @@ export async function checkPremiumEntitlement() {
   const session = await freshSession();
   if (!session) return { available: false, premium: false };
   const result = await callFunction("/entitlement", { session });
-  if (!result.ok) return { available: false, premium: false };
-  return { available: true, premium: Boolean(result.data.premium) };
+  // callFunction swallows JSON parse failures into {} (see its own
+  // .catch), so a malformed/truncated 200 response is otherwise
+  // indistinguishable from a legitimate { premium: false } — checking
+  // the field's actual type, not just truthiness, keeps that case in
+  // the "unknown" bucket too instead of reading as a confirmed non-owner.
+  if (!result.ok || typeof result.data.premium !== "boolean") {
+    return { available: false, premium: false };
+  }
+  return { available: true, premium: result.data.premium };
 }
 
 const PURCHASE_ERROR_MESSAGES = {

@@ -1,5 +1,5 @@
 import { findCrop, findMarket } from "./data.js";
-import { dayIndex } from "./state.js";
+import { dayIndex, pushLog } from "./state.js";
 import { recordTransaction } from "./finance.js";
 
 function hashString(str) {
@@ -54,6 +54,6 @@ export function sellCrop(state, cropId, marketId, kg) {
   });
 
   const message = `Sold ${kgQty} kg of ${crop.name} at ${market.label} for ₦${netRevenue.toLocaleString()}.`;
-  state.log.push(message);
+  pushLog(state, message);
   return { ok: true, message, netRevenue };
 }

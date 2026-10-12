@@ -1,5 +1,6 @@
 import { findLandOption } from "./data.js";
 import { recordTransaction } from "./finance.js";
+import { pushLog } from "./state.js";
 
 export const SOIL_LABELS = {
   loamy: "Loamy",
@@ -35,7 +36,7 @@ export function leaseLand(state, landOptionId) {
     state.land.push(newPlot(randomSoil(option.soils)));
   }
   const message = `Leased the ${option.label} (${option.plots} plot${option.plots > 1 ? "s" : ""}).`;
-  state.log.push(message);
+  pushLog(state, message);
   return { ok: true, message };
 }
 
@@ -57,6 +58,6 @@ export function preparePlot(state, plotIndex, tierId) {
   plot.readiness = Math.min(100, plot.readiness + tier.readinessGain);
 
   const message = `${tier.label} done on Plot ${plotIndex + 1} — Readiness now ${plot.readiness}.`;
-  state.log.push(message);
+  pushLog(state, message);
   return { ok: true, message };
 }

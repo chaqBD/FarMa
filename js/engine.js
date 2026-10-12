@@ -1,12 +1,14 @@
 import { CONFIG } from "./data.js";
 import { seasonForMonth, monthName } from "./state.js";
 import { growPlots } from "./crops.js";
+import { maybeTriggerEvent } from "./events.js";
 
 /**
- * Advances the game clock by one day, mutating state in place. Returns a
- * short log line. Does not save — callers that also append to state.log
- * should do both, then save once, so the log entry for the new day is
- * never dropped from the persisted save.
+ * Advances the game clock by one day, mutating state in place. Returns
+ * { dateLine, event }: a short log line, and a random event to present to
+ * the player (or null). Does not save — callers that also append to
+ * state.log should do both, then save once, so the log entry for the new
+ * day is never dropped from the persisted save.
  */
 export function advanceDay(state) {
   state.time.day += 1;
@@ -28,7 +30,9 @@ export function advanceDay(state) {
 
   growPlots(state);
 
-  return describeDate(state.time);
+  const event = maybeTriggerEvent(state);
+
+  return { dateLine: describeDate(state.time), event };
 }
 
 function drift(value, target, step) {

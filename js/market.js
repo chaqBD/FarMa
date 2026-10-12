@@ -26,7 +26,7 @@ export function sellCrop(state, cropId, marketId, kg) {
   if (!crop || !market) return { ok: false, message: "That crop or market doesn't exist." };
 
   const kgQty = Math.floor(Number(kg));
-  if (!kgQty || kgQty <= 0) return { ok: false, message: "Enter a quantity to sell." };
+  if (!(kgQty > 0)) return { ok: false, message: "Enter a quantity to sell." };
 
   const available = state.inventory[cropId] || 0;
   if (kgQty > available) return { ok: false, message: `You only have ${available} kg of ${crop.name}.` };

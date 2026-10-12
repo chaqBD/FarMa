@@ -8,17 +8,24 @@ export function marketScreen(state, navigate) {
   const screen = el("div", { class: "screen market-screen" });
 
   function renderPriceTable(cropId) {
-    return el(
-      "table",
-      { class: "price-table" },
-      MARKETS.map((market) => {
+    return el("table", { class: "price-table" }, [
+      el("tr", {}, [
+        el("th", {}, ["Market"]),
+        el("th", {}, ["Price/kg"]),
+        el("th", {}, ["Transport/kg"]),
+        el("th", {}, ["Net/kg"]),
+      ]),
+      ...MARKETS.map((market) => {
         const price = priceFor(state, cropId, market.id);
+        const net = price - market.transportCostPerKg;
         return el("tr", {}, [
           el("td", {}, [market.label]),
-          el("td", {}, [formatNaira(price) + "/kg"]),
+          el("td", {}, [formatNaira(price)]),
+          el("td", {}, [formatNaira(market.transportCostPerKg)]),
+          el("td", { class: "net-cell" }, [formatNaira(net)]),
         ]);
-      })
-    );
+      }),
+    ]);
   }
 
   function renderCropCard(cropId, kg) {

@@ -44,6 +44,8 @@ export function newGameState({ name, gender, homeState, farmName, backgroundId }
     finances: {
       cash: background.startingCash,
       startingAsset: background.startingAsset,
+      lifetimeIncome: 0,
+      lifetimeExpense: 0,
     },
     time: { ...CONFIG.startDate },
     land: [],
@@ -85,6 +87,8 @@ function withDefaults(state) {
   if (!state.land) state.land = [];
   if (!state.inventory) state.inventory = {};
   if (!state.financeLog) state.financeLog = [];
+  if (state.finances.lifetimeIncome === undefined) state.finances.lifetimeIncome = 0;
+  if (state.finances.lifetimeExpense === undefined) state.finances.lifetimeExpense = 0;
   return state;
 }
 

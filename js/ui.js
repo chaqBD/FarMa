@@ -19,7 +19,9 @@ export function el(tag, props = {}, children = []) {
 }
 
 export function formatNaira(amount) {
-  return "₦" + Math.round(amount).toLocaleString("en-NG");
+  const rounded = Math.round(amount);
+  const sign = rounded < 0 ? "-" : "";
+  return sign + "₦" + Math.abs(rounded).toLocaleString("en-NG");
 }
 
 const app = () => document.getElementById("app");

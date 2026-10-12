@@ -1,0 +1,17 @@
+{
+  "startDate": { "day": 1, "month": 4, "year": 1 },
+  "daysPerMonth": 30,
+  "monthsPerYear": 12,
+  "raintySeasonMonths": [4, 5, 6, 7, 8, 9, 10],
+  "drySeasonMonths": [11, 12, 1, 2, 3],
+  "baseStats": {
+    "farmingSkill": 30,
+    "businessSense": 30,
+    "energy": 80,
+    "health": 80,
+    "reputation": 40,
+    "network": 30
+  },
+  "statRange": { "min": 0, "max": 100 },
+  "saveKey": "farma_save_v1"
+}

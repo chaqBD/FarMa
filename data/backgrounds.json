@@ -1,0 +1,62 @@
+[
+  {
+    "id": "village_heir",
+    "label": "Village heir",
+    "startingCash": 250000,
+    "startingAsset": "1 plot of family land (no C of O)",
+    "perk": "Free land, community trust +20",
+    "drawback": "Family wahala events; land dispute risk",
+    "statMods": { "reputation": 20 },
+    "flags": { "hasFreeLand": true, "landDisputeRisk": true, "familyWahala": true }
+  },
+  {
+    "id": "agric_graduate",
+    "label": "Agric graduate (NYSC done)",
+    "startingCash": 400000,
+    "startingAsset": null,
+    "perk": "Yield +10%, soil test discount",
+    "drawback": "Low cash, no network",
+    "statMods": { "farmingSkill": 15, "network": -10 },
+    "flags": { "yieldBonus": 0.10, "soilTestDiscount": true }
+  },
+  {
+    "id": "lagos_tech",
+    "label": "Lagos tech bro / babe",
+    "startingCash": 3000000,
+    "startingAsset": "Smartphone farm-app access",
+    "perk": "Fast market price info",
+    "drawback": "Workers distrust \"city people\"; theft risk +15%",
+    "statMods": { "businessSense": 15, "reputation": -10 },
+    "flags": { "fastMarketInfo": true, "theftRiskBonus": 0.15 }
+  },
+  {
+    "id": "retired_civil_servant",
+    "label": "Retired civil servant",
+    "startingCash": 5000000,
+    "startingAsset": "Pension + Toyota pickup",
+    "perk": "Loan approval +20%",
+    "drawback": "Energy stat caps lower; slower actions",
+    "statMods": { "businessSense": 10, "energy": -15 },
+    "flags": { "loanApprovalBonus": 0.20, "energyCapReduced": true }
+  },
+  {
+    "id": "returnee_jjc",
+    "label": "Returnee from abroad (\"JJC\")",
+    "startingCash": 8000000,
+    "startingAsset": "Foreign savings",
+    "perk": "Can import equipment",
+    "drawback": "Gets overcharged at first; scam events",
+    "statMods": { "network": 15, "farmingSkill": -10 },
+    "flags": { "canImportEquipment": true, "scamRisk": true, "overchargedStart": true }
+  },
+  {
+    "id": "market_womans_child",
+    "label": "Market woman's child",
+    "startingCash": 600000,
+    "startingAsset": "Contacts at Mile 12",
+    "perk": "Best selling prices from day 1",
+    "drawback": "Knows trade, not farming: yield -10% at start",
+    "statMods": { "businessSense": 20, "farmingSkill": -10 },
+    "flags": { "bestSellingPrices": true, "yieldPenalty": 0.10 }
+  }
+]

@@ -1,4 +1,4 @@
-import { el, formatNaira, toast } from "../ui.js";
+import { el, formatNaira, toast, icon } from "../ui.js";
 import { BACKGROUNDS } from "../data.js";
 import { newGameState, saveGame } from "../state.js";
 
@@ -45,7 +45,7 @@ export function playerCreationScreen(onComplete) {
           },
         },
         [
-          el("h3", {}, [bg.label]),
+          el("div", { class: "card-title-row" }, [icon("logo", 28), el("h3", {}, [bg.label])]),
           el("p", { class: "cash" }, [formatNaira(bg.startingCash)]),
           el("p", { class: "perk" }, ["✓ " + bg.perk]),
           el("p", { class: "drawback" }, ["✗ " + bg.drawback]),
@@ -74,11 +74,21 @@ export function playerCreationScreen(onComplete) {
     onComplete(state);
   }
 
-  return el("div", { class: "screen player-creation" }, [
-    el("header", {}, [
-      el("h1", {}, ["FaRma"]),
-      el("p", { class: "tagline" }, ["From one plot to the whole market — can you feed Lagos and still make profit?"]),
+  const hero = el("header", { class: "hero" }, [
+    el("div", { class: "hero-sky" }, [
+      el("div", { class: "hero-sun" }),
+      el("div", { class: "hero-hill hero-hill-back" }),
+      el("div", { class: "hero-hill hero-hill-front" }),
+      el("div", { class: "hero-crop hero-crop-1" }, [icon("maize", 40)]),
+      el("div", { class: "hero-crop hero-crop-2" }, [icon("cassava", 36)]),
+      el("div", { class: "hero-crop hero-crop-3" }, [icon("tomato", 32)]),
     ]),
+    el("div", { class: "hero-title-row" }, [icon("logo", 48), el("h1", {}, ["FaRma"])]),
+    el("p", { class: "tagline" }, ["From one plot to the whole market — can you feed Lagos and still make profit?"]),
+  ]);
+
+  return el("div", { class: "screen player-creation" }, [
+    hero,
     el("section", { class: "form-row" }, [
       el("label", {}, ["Your name", nameInput]),
       el("label", {}, ["Gender", genderSelect]),

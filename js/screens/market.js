@@ -1,4 +1,4 @@
-import { el, formatNaira, toast } from "../ui.js";
+import { el, formatNaira, toast, icon } from "../ui.js";
 import { MARKETS, findCrop } from "../data.js";
 import { saveGame } from "../state.js";
 import { priceFor, sellCrop } from "../market.js";
@@ -19,7 +19,7 @@ export function marketScreen(state, navigate) {
         const price = priceFor(state, cropId, market.id);
         const net = price - market.transportCostPerKg;
         return el("tr", {}, [
-          el("td", {}, [market.label]),
+          el("td", { class: "market-name-cell" }, [icon(market.id, 22), market.label]),
           el("td", {}, [formatNaira(price)]),
           el("td", {}, [formatNaira(market.transportCostPerKg)]),
           el("td", { class: "net-cell" }, [formatNaira(net)]),
@@ -38,7 +38,7 @@ export function marketScreen(state, navigate) {
     const qtyInput = el("input", { type: "number", min: "1", max: String(kg), value: String(kg) });
 
     return el("div", { class: "card crop-market-card" }, [
-      el("h3", {}, [`${crop.name} — ${kg} kg in store`]),
+      el("div", { class: "card-title-row" }, [icon(crop.id, 36), el("h3", {}, [`${crop.name} — ${kg} kg in store`])]),
       el("p", { class: "muted" }, ["Today's prices:"]),
       renderPriceTable(cropId),
       el("div", { class: "form-row" }, [

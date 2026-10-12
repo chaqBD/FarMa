@@ -1,7 +1,7 @@
 import { el, formatNaira, toast, icon } from "../ui.js";
 import { totals } from "../finance.js";
 import { saveGame, pushLog } from "../state.js";
-import { isVatarAvailable, isEmbeddedInLagosLife, initVatar, purchasePremium } from "../vatar.js";
+import { isEmbeddedInLagosLife, retryInitIfNeeded, purchasePremium } from "../vatar.js";
 import { navBar } from "./nav.js";
 
 const TYPE_LABELS = {
@@ -18,20 +18,22 @@ const TYPE_LABELS = {
 export function bankScreen(state, navigate) {
   const screen = el("div", { class: "screen bank-screen" });
   let buying = false;
-  let retriedInit = false;
+  let retryInFlight = false;
 
-  // initVatar() only caches on success (see js/vatar.js), so a prior
-  // transient handshake failure is safely retryable — a genuinely-
-  // embedded player shouldn't be stuck seeing "open inside Lagos Life"
-  // for the rest of the session just because the first attempt hiccuped.
-  // Only worth trying when the SDK script itself loaded at all
-  // (isVatarAvailable()); skips wasted retries when it's plainly absent.
-  // Fires at most once per visit to this screen, not on every redraw.
+  // retryInitIfNeeded() guards its own one-retry-per-session limit (see
+  // js/vatar.js) and syncs Premium ownership too if the retry succeeds —
+  // retryInFlight here just stops this screen instance from firing it
+  // more than once while the first call is still pending.
   function maybeRetryInit() {
-    if (retriedInit || isEmbeddedInLagosLife() || !isVatarAvailable()) return;
-    retriedInit = true;
-    initVatar().then((info) => {
-      if (info) redraw();
+    if (retryInFlight) return;
+    retryInFlight = true;
+    retryInitIfNeeded(state).then((result) => {
+      if (!result) return;
+      if (result.premiumChanged) {
+        pushLog(state, "Premium Pass unlocked! ✨");
+        saveGame(state);
+      }
+      redraw();
     });
   }
 

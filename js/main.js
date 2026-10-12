@@ -7,7 +7,7 @@ import { landScreen } from "./screens/land.js";
 import { marketScreen } from "./screens/market.js";
 import { bankScreen } from "./screens/bank.js";
 import { workersScreen } from "./screens/workers.js";
-import { initVatar, restoreInterruptedPurchases, checkPremiumEntitlement } from "./vatar.js";
+import { initVatar, syncPremiumFromVatar } from "./vatar.js";
 
 const SCREENS = {
   home: dashboardScreen,
@@ -42,12 +42,10 @@ function showScreen(state, screenId) {
 async function syncPremiumStatus(state, vatarInfo) {
   if (!vatarInfo) return;
 
-  await restoreInterruptedPurchases();
-  const { available, premium } = await checkPremiumEntitlement();
-  if (!available || premium === state.premium) return;
+  const changed = await syncPremiumFromVatar(state);
+  if (!changed) return;
 
-  state.premium = premium;
-  if (premium) pushLog(state, "Premium Pass unlocked! ✨");
+  if (state.premium) pushLog(state, "Premium Pass unlocked! ✨");
   saveGame(state);
   showScreen(state, currentScreenId);
 }

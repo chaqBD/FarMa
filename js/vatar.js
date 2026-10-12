@@ -144,3 +144,40 @@ export async function restoreInterruptedPurchases() {
     console.warn("restoreInterruptedPurchases failed:", err?.code || err);
   }
 }
+
+/**
+ * Restores interrupted purchases and brings state.premium in line with
+ * what Vatar says this player owns. Mutates state.premium directly;
+ * callers own saving/logging/redrawing, since those are app concerns
+ * this module otherwise stays free of. Returns whether it changed.
+ */
+export async function syncPremiumFromVatar(state) {
+  await restoreInterruptedPurchases();
+  const { available, premium } = await checkPremiumEntitlement();
+  if (!available || premium === state.premium) return false;
+  state.premium = premium;
+  return true;
+}
+
+let retryAttempted = false;
+
+/**
+ * If the one startup initVatar() attempt (see main.js's start()) failed,
+ * allows exactly one retry for the rest of the session — initVatar()
+ * itself only caches on success, so a transient handshake hiccup is
+ * safely retryable. Session-wide, not per-screen-instance: a host that
+ * can never embed (e.g. the standalone GitHub Pages link, which still
+ * loads the SDK script and so passes isVatarAvailable()) only ever pays
+ * for one extra failed attempt total, not one on every Bank screen visit.
+ * Returns null when there was nothing to do (already known, already
+ * retried, or no SDK script present) — callers should only redraw when
+ * they get a real result back.
+ */
+export async function retryInitIfNeeded(state) {
+  if (isEmbeddedInLagosLife() || retryAttempted || !isVatarAvailable()) return null;
+  retryAttempted = true;
+  const info = await initVatar();
+  if (!info) return null;
+  const premiumChanged = await syncPremiumFromVatar(state);
+  return { premiumChanged };
+}

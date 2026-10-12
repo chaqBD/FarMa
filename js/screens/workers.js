@@ -45,11 +45,22 @@ export function workersScreen(state, navigate) {
 
   function renderWorkerCard(worker) {
     const plots = assignablePlots();
+    // If this worker's current plot has since gone mature (or otherwise
+    // fallen out of assignablePlots()), still offer it so the dropdown
+    // reflects their real assignment — otherwise .value below would match
+    // no option, read back as "", and "Set assignment" would silently
+    // unassign a worker the player never touched.
+    const currentIndex = worker.assignedPlotIndex;
+    const options = plots.map(({ index }) => ({ index, label: `Plot ${index + 1}` }));
+    if (currentIndex !== null && !options.some((o) => o.index === currentIndex) && state.land[currentIndex]) {
+      options.push({ index: currentIndex, label: `Plot ${currentIndex + 1} (not growing)` });
+    }
+
     const assignSelect = el("select", {}, [
       el("option", { value: "" }, ["Unassigned"]),
-      ...plots.map(({ index }) => el("option", { value: String(index) }, [`Plot ${index + 1}`])),
+      ...options.map(({ index, label }) => el("option", { value: String(index) }, [label])),
     ]);
-    assignSelect.value = worker.assignedPlotIndex === null ? "" : String(worker.assignedPlotIndex);
+    assignSelect.value = currentIndex === null ? "" : String(currentIndex);
 
     return el("div", { class: "card worker-card" }, [
       el("h3", {}, [worker.name]),

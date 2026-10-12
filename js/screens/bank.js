@@ -1,7 +1,7 @@
 import { el, formatNaira, toast, icon } from "../ui.js";
 import { totals } from "../finance.js";
 import { saveGame, pushLog } from "../state.js";
-import { isEmbeddedInLagosLife, purchasePremium } from "../vatar.js";
+import { isVatarAvailable, isEmbeddedInLagosLife, initVatar, purchasePremium } from "../vatar.js";
 import { navBar } from "./nav.js";
 
 const TYPE_LABELS = {
@@ -18,6 +18,22 @@ const TYPE_LABELS = {
 export function bankScreen(state, navigate) {
   const screen = el("div", { class: "screen bank-screen" });
   let buying = false;
+  let retriedInit = false;
+
+  // initVatar() only caches on success (see js/vatar.js), so a prior
+  // transient handshake failure is safely retryable — a genuinely-
+  // embedded player shouldn't be stuck seeing "open inside Lagos Life"
+  // for the rest of the session just because the first attempt hiccuped.
+  // Only worth trying when the SDK script itself loaded at all
+  // (isVatarAvailable()); skips wasted retries when it's plainly absent.
+  // Fires at most once per visit to this screen, not on every redraw.
+  function maybeRetryInit() {
+    if (retriedInit || isEmbeddedInLagosLife() || !isVatarAvailable()) return;
+    retriedInit = true;
+    initVatar().then((info) => {
+      if (info) redraw();
+    });
+  }
 
   function renderPremiumCard() {
     if (state.premium) {
@@ -33,6 +49,7 @@ export function bankScreen(state, navigate) {
     ];
 
     if (!isEmbeddedInLagosLife()) {
+      maybeRetryInit();
       body.push(el("p", { class: "muted" }, ["Open FaRma inside Lagos Life to buy the Premium Pass."]));
     } else {
       body.push(

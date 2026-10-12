@@ -35,6 +35,13 @@ const app = () => document.getElementById("app");
 
 export function render(screen) {
   const root = app();
+  // #app starts with class="loading" (centers a one-line message in a
+  // 100vh box while data loads). If that class is never removed, every
+  // real screen keeps getting vertically centered in that 100vh box too —
+  // once content is taller than the viewport, the top half overflows
+  // above y=0 with no way to scroll up to it, burying content on every
+  // page. Reset to a plain container on the first real render.
+  root.className = "app";
   root.innerHTML = "";
   root.appendChild(screen);
 }

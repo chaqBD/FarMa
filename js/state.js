@@ -1,6 +1,13 @@
 import { CONFIG, BACKGROUNDS } from "./data.js";
 
-const STATS = ["farmingSkill", "businessSense", "energy", "health", "reputation", "network"];
+export const STAT_LABELS = {
+  farmingSkill: "Farming Skill",
+  businessSense: "Business Sense",
+  energy: "Energy",
+  health: "Health",
+  reputation: "Reputation",
+  network: "Network",
+};
 
 function clampStat(value) {
   return Math.max(CONFIG.statRange.min, Math.min(CONFIG.statRange.max, value));
@@ -16,7 +23,7 @@ export function newGameState({ name, gender, homeState, farmName, backgroundId }
 
   const stats = { ...CONFIG.baseStats };
   for (const [stat, mod] of Object.entries(background.statMods || {})) {
-    if (STATS.includes(stat)) stats[stat] = clampStat(stats[stat] + mod);
+    if (stat in stats) stats[stat] = clampStat(stats[stat] + mod);
   }
 
   return {
@@ -28,6 +35,10 @@ export function newGameState({ name, gender, homeState, farmName, backgroundId }
       farmName,
       backgroundId,
       stats,
+      // The post-background resting point each stat drifts back toward
+      // on quiet days, so a background's permanent modifier (e.g. a lower
+      // energy cap) never gets erased by day-to-day recovery.
+      restingStats: { ...stats },
       flags: { ...background.flags },
     },
     finances: {

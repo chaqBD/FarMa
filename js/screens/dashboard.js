@@ -1,15 +1,6 @@
 import { el, formatNaira, toast } from "../ui.js";
 import { advanceDay, describeDate } from "../engine.js";
-import { clearSave } from "../state.js";
-
-const STAT_LABELS = {
-  farmingSkill: "Farming Skill",
-  businessSense: "Business Sense",
-  energy: "Energy",
-  health: "Health",
-  reputation: "Reputation",
-  network: "Network",
-};
+import { clearSave, saveGame, STAT_LABELS } from "../state.js";
 
 const NAV_ITEMS = [
   { id: "home", label: "Home", enabled: true },
@@ -87,6 +78,7 @@ export function dashboardScreen(state) {
           onClick: () => {
             const dateLine = advanceDay(state);
             state.log.push(dateLine);
+            saveGame(state);
             redraw();
           },
         },

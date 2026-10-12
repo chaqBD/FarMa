@@ -1,7 +1,12 @@
 import { CONFIG } from "./data.js";
-import { seasonForMonth, monthName, saveGame } from "./state.js";
+import { seasonForMonth, monthName } from "./state.js";
 
-/** Advances the game clock by one day, mutating state in place. Returns a short log line. */
+/**
+ * Advances the game clock by one day, mutating state in place. Returns a
+ * short log line. Does not save — callers that also append to state.log
+ * should do both, then save once, so the log entry for the new day is
+ * never dropped from the persisted save.
+ */
 export function advanceDay(state) {
   state.time.day += 1;
   if (state.time.day > CONFIG.daysPerMonth) {
@@ -13,12 +18,13 @@ export function advanceDay(state) {
     }
   }
 
-  // Energy and health drift gently toward their baseline each day of rest.
-  const baseline = CONFIG.baseStats;
-  state.player.stats.energy = drift(state.player.stats.energy, baseline.energy, 2);
-  state.player.stats.health = drift(state.player.stats.health, baseline.health, 1);
+  // Energy and health drift gently toward the player's own resting point
+  // each day of rest — not the global baseline, so a background's
+  // permanent stat modifier (e.g. a lower energy cap) persists.
+  const resting = state.player.restingStats;
+  state.player.stats.energy = drift(state.player.stats.energy, resting.energy, 2);
+  state.player.stats.health = drift(state.player.stats.health, resting.health, 1);
 
-  saveGame(state);
   return describeDate(state.time);
 }
 

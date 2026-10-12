@@ -4,6 +4,8 @@ A text-driven Nigerian farming life-sim. Start with a little cash and a big drea
 
 > "From one plot to the whole market — can you feed Lagos and still make profit?"
 
+**Play it:** https://chaqBD.github.io/FarMa/
+
 Full design concept: [docs/FaRma - Game Design Concept.pdf](docs/FaRma%20-%20Game%20Design%20Concept.pdf)
 
 ## Status

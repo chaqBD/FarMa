@@ -24,8 +24,11 @@
   <!-- Vatar Games SDK: loaded from Lagos Life itself so it always carries
        their latest security fixes. No-ops harmlessly when FaRma is opened
        standalone (not inside the Lagos Life frame) — js/vatar.js handles
-       that gracefully. -->
-  <script src="https://lagoslife.app/sdk/vatar-games-v1.js"></script>
+       that gracefully. `defer` so most sessions (standalone, not inside
+       Lagos Life) aren't held up waiting on this fetch before first
+       paint — deferred scripts still run in document order, before
+       js/main.js, so window.Vatar is defined whenever main.js needs it. -->
+  <script src="https://lagoslife.app/sdk/vatar-games-v1.js" defer></script>
 </head>
 <body>
   <div id="app" class="loading">Loading FaRma…</div>

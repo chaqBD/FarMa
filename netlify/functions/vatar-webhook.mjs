@@ -33,6 +33,10 @@ export default async (req) => {
     if (purchase.http === 200 && purchase.status !== "refunded") {
       const store = getStore("entitlements");
       await store.setJSON(purchase.playerId, { premium: true, purchaseId: purchase.id, grantedAt: Date.now() });
+      // Keep Vatar's own delivery bookkeeping in sync with ours — otherwise
+      // this purchase stays "undelivered" on their side forever, and
+      // restoreInterruptedPurchases() keeps re-claiming it on every load.
+      await vatarApi(`/purchases/${purchase.id}/deliver`, {}, SECRET);
     }
   }
 

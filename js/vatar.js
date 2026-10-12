@@ -94,7 +94,13 @@ export async function purchasePremium() {
     return { ok: false, code, message: PURCHASE_ERROR_MESSAGES[code] || "Something went wrong with the purchase." };
   }
 
-  const claimed = await claimPurchase(purchase.purchaseId);
+  let claimed;
+  try {
+    claimed = await claimPurchase(purchase.purchaseId);
+  } catch (err) {
+    console.warn("claimPurchase (purchasePremium) failed:", err);
+    claimed = { ok: false };
+  }
   if (!claimed.ok) {
     return { ok: false, code: "error", message: "Payment went through, but we couldn't confirm it. Reopen FaRma to retry." };
   }

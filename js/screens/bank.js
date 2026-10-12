@@ -50,6 +50,13 @@ export function bankScreen(state, navigate) {
         saveGame(state);
       }
       if (active) redraw();
+    }).catch((err) => {
+      // Without this, a rejection (e.g. the entitlement fetch throwing)
+      // leaves retryInFlight stuck true forever for this screen instance,
+      // since the .then() above — the only place that resets it — would
+      // never run.
+      retryInFlight = false;
+      console.warn("Premium sync failed:", err);
     });
   }
 

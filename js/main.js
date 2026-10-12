@@ -51,7 +51,14 @@ async function start() {
     // so Bank's first paint already reflects the right embed/premium
     // status instead of guessing standalone and correcting itself a
     // moment later.
-    const result = await withTimeout(ensureVatarSynced(existingSave), VATAR_INIT_TIMEOUT_MS, null);
+    const result = await withTimeout(
+      ensureVatarSynced(existingSave).catch((err) => {
+        console.warn("Premium sync failed:", err);
+        return null;
+      }),
+      VATAR_INIT_TIMEOUT_MS,
+      null
+    );
     if (result?.premiumChanged) applyPremiumChange(existingSave);
     showScreen(existingSave, "home");
   } else {

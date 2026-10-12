@@ -1,6 +1,6 @@
 import { el, formatNaira, showEventModal } from "../ui.js";
 import { advanceDay, describeDate } from "../engine.js";
-import { clearSave, saveGame, STAT_LABELS } from "../state.js";
+import { clearSave, saveGame, STAT_LABELS, pushLog } from "../state.js";
 import { resolveEventChoice } from "../events.js";
 import { navBar } from "./nav.js";
 
@@ -51,7 +51,7 @@ export function dashboardScreen(state, navigate) {
           type: "button",
           onClick: () => {
             const { dateLine, event } = advanceDay(state);
-            state.log.push(dateLine);
+            pushLog(state, dateLine);
             saveGame(state);
             if (event) {
               showEventModal(event, (choiceIndex) => {

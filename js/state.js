@@ -74,6 +74,18 @@ export function dayIndex(time) {
   return (time.year - 1) * CONFIG.daysPerMonth * CONFIG.monthsPerYear + (time.month - 1) * CONFIG.daysPerMonth + time.day;
 }
 
+// The log is a rolling feed (the dashboard only ever shows the last 6), so
+// it's trimmed here rather than left to grow for the life of a save.
+const MAX_LOG_ENTRIES = 300;
+
+/** Appends a line to state.log, trimming old entries so the save doesn't grow without bound. */
+export function pushLog(state, message) {
+  state.log.push(message);
+  if (state.log.length > MAX_LOG_ENTRIES) {
+    state.log.splice(0, state.log.length - MAX_LOG_ENTRIES);
+  }
+}
+
 export function saveGame(state) {
   localStorage.setItem(CONFIG.saveKey, JSON.stringify(state));
 }

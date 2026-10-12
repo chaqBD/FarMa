@@ -1,18 +1,28 @@
-import { EVENTS } from "./data.js";
-import { dayIndex, clampStat } from "./state.js";
+import { CONFIG, EVENTS } from "./data.js";
+import { dayIndex, clampStat, pushLog } from "./state.js";
 import { recordTransaction } from "./finance.js";
 import { isMature } from "./crops.js";
 
 // No event can fire in the player's first couple of weeks, so a new game
 // always has a short stretch to get land and a first crop going before
-// anything can go wrong.
+// anything can go wrong. dayIndex() counts from the calendar epoch, not
+// from the game's start date (which is day-of-year ~91), so the grace
+// period is measured relative to CONFIG.startDate, not to zero.
 const GRACE_PERIOD_DAYS = 14;
 const DAILY_EVENT_CHANCE = 0.12;
+
+function daysSinceStart(time) {
+  return dayIndex(time) - dayIndex(CONFIG.startDate);
+}
 
 const REQUIREMENT_CHECKS = {
   always: () => true,
   anyLand: (state) => state.land.length > 0,
-  landWithCrop: (state) => state.land.some((plot) => plot.crop),
+  // A mature, unharvested crop is no longer "at risk" the way a growing
+  // one is — weather/pest events resolve by nudging a growing plot's
+  // care (see randomGrowingPlotCareDelta below), which only ever
+  // targets non-mature plots, so this requirement matches that.
+  landWithCrop: (state) => state.land.some((plot) => plot.crop && !isMature(plot)),
   inventory: (state) => Object.values(state.inventory).some((kg) => kg > 0),
 };
 
@@ -33,7 +43,7 @@ function weightedPick(candidates) {
 
 /** Called once per day-advance. Returns an event to show the player, or null. */
 export function maybeTriggerEvent(state) {
-  if (dayIndex(state.time) < GRACE_PERIOD_DAYS) return null;
+  if (daysSinceStart(state.time) < GRACE_PERIOD_DAYS) return null;
   if (Math.random() > DAILY_EVENT_CHANCE) return null;
 
   const candidates = EVENTS.filter((event) => eventApplies(event, state));
@@ -94,6 +104,6 @@ export function resolveEventChoice(state, event, choiceIndex) {
   }
 
   const message = `${event.title}: ${choice.resultText}`;
-  state.log.push(message);
+  pushLog(state, message);
   return { ok: true, message };
 }

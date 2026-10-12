@@ -1,5 +1,6 @@
 import { findCrop } from "./data.js";
 import { recordTransaction } from "./finance.js";
+import { pushLog } from "./state.js";
 
 export const SEED_TIERS = {
   open_market: { label: "Open market seed", cost: 15000, yieldFactor: 0.85 },
@@ -30,7 +31,7 @@ export function plantCrop(state, plotIndex, cropId, seedTierId) {
   plot.crop = { cropId, seedTierId, daysGrown: 0, care: 0, tendCount: 0 };
 
   const message = `Planted ${crop.name} on Plot ${plotIndex + 1} (${seedTier.label}).`;
-  state.log.push(message);
+  pushLog(state, message);
   return { ok: true, message };
 }
 
@@ -53,7 +54,7 @@ export function tendPlot(state, plotIndex) {
   plot.crop.tendCount += 1;
 
   const message = `Weeded and watered Plot ${plotIndex + 1}.`;
-  state.log.push(message);
+  pushLog(state, message);
   return { ok: true, message };
 }
 
@@ -95,6 +96,6 @@ export function harvestPlot(state, plotIndex) {
 
   const estimatedValue = Math.round(yieldKg * crop.basePricePerKg);
   const message = `Harvested ${yieldKg} kg of ${crop.name} from Plot ${plotIndex + 1} (worth roughly ₦${estimatedValue.toLocaleString()} at market).`;
-  state.log.push(message);
+  pushLog(state, message);
   return { ok: true, message, yieldKg };
 }

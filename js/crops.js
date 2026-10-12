@@ -1,4 +1,5 @@
 import { findCrop } from "./data.js";
+import { recordTransaction } from "./finance.js";
 
 export const SEED_TIERS = {
   open_market: { label: "Open market seed", cost: 15000, yieldFactor: 0.85 },
@@ -25,6 +26,7 @@ export function plantCrop(state, plotIndex, cropId, seedTierId) {
   }
 
   state.finances.cash -= seedTier.cost;
+  recordTransaction(state, { type: "seed", amount: -seedTier.cost, note: `${seedTier.label} for Plot ${plotIndex + 1} (${crop.name})` });
   plot.crop = { cropId, seedTierId, daysGrown: 0, care: 0, tendCount: 0 };
 
   const message = `Planted ${crop.name} on Plot ${plotIndex + 1} (${seedTier.label}).`;
@@ -45,6 +47,7 @@ export function tendPlot(state, plotIndex) {
   if (state.finances.cash < CASH_COST) return { ok: false, message: "Not enough cash to tend this plot." };
 
   state.finances.cash -= CASH_COST;
+  recordTransaction(state, { type: "tending", amount: -CASH_COST, note: `Tended Plot ${plotIndex + 1}` });
   state.player.stats.energy -= ENERGY_COST;
   plot.crop.care = Math.min(100, plot.crop.care + 20);
   plot.crop.tendCount += 1;

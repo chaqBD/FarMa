@@ -203,6 +203,13 @@ input, select {
 .lease-more { margin-top: 16px; }
 .lease-more summary { cursor: pointer; color: var(--green); font-weight: 600; margin-bottom: 10px; }
 
+/* Market & Bank */
+.price-table, .ledger-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 8px 0; }
+.price-table td, .ledger-table td { padding: 4px 6px; border-bottom: 1px solid #efe8d9; }
+.ledger-table td:last-child { text-align: right; font-weight: 600; }
+.cash.positive, .positive { color: var(--green); }
+.cash.negative, .negative { color: var(--danger); }
+
 @media (max-width: 480px) {
   .screen { padding: 12px; }
   .cash-display { font-size: 1rem; }

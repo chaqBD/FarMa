@@ -1,4 +1,5 @@
 import { findLandOption } from "./data.js";
+import { recordTransaction } from "./finance.js";
 
 export const SOIL_LABELS = {
   loamy: "Loamy",
@@ -29,6 +30,7 @@ export function leaseLand(state, landOptionId) {
   }
 
   state.finances.cash -= option.leaseCost;
+  recordTransaction(state, { type: "land_lease", amount: -option.leaseCost, note: `Leased ${option.label}` });
   for (let i = 0; i < option.plots; i++) {
     state.land.push(newPlot(randomSoil(option.soils)));
   }
@@ -48,6 +50,9 @@ export function preparePlot(state, plotIndex, tierId) {
   if (state.player.stats.energy < tier.energyCost) return { ok: false, message: "Too tired — rest first." };
 
   state.finances.cash -= tier.cost;
+  if (tier.cost > 0) {
+    recordTransaction(state, { type: "land_prep", amount: -tier.cost, note: `${tier.label} on Plot ${plotIndex + 1}` });
+  }
   state.player.stats.energy -= tier.energyCost;
   plot.readiness = Math.min(100, plot.readiness + tier.readinessGain);
 

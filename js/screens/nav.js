@@ -6,8 +6,8 @@ export const NAV_ITEMS = [
   { id: "shop", label: "Shop", enabled: false },
   { id: "workers", label: "Workers", enabled: false },
   { id: "livestock", label: "Livestock", enabled: false },
-  { id: "market", label: "Market", enabled: false },
-  { id: "bank", label: "Bank", enabled: false },
+  { id: "market", label: "Market", enabled: true },
+  { id: "bank", label: "Bank", enabled: true },
   { id: "life", label: "Life", enabled: false },
 ];
 

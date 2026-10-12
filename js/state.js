@@ -48,6 +48,7 @@ export function newGameState({ name, gender, homeState, farmName, backgroundId }
     time: { ...CONFIG.startDate },
     land: [],
     inventory: {},
+    financeLog: [],
     log: [
       `${farmName} is founded by ${name} in ${homeState}. ${background.perk}.`,
     ],
@@ -66,6 +67,11 @@ export function monthName(month) {
   return names[month - 1];
 }
 
+/** A strictly increasing day count from the start of the game, used to seed market price drift. */
+export function dayIndex(time) {
+  return (time.year - 1) * CONFIG.daysPerMonth * CONFIG.monthsPerYear + (time.month - 1) * CONFIG.daysPerMonth + time.day;
+}
+
 export function saveGame(state) {
   localStorage.setItem(CONFIG.saveKey, JSON.stringify(state));
 }
@@ -78,6 +84,7 @@ export function saveGame(state) {
 function withDefaults(state) {
   if (!state.land) state.land = [];
   if (!state.inventory) state.inventory = {};
+  if (!state.financeLog) state.financeLog = [];
   return state;
 }
 

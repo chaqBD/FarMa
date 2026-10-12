@@ -4,10 +4,14 @@ import { render } from "./ui.js";
 import { playerCreationScreen } from "./screens/playerCreation.js";
 import { dashboardScreen } from "./screens/dashboard.js";
 import { landScreen } from "./screens/land.js";
+import { marketScreen } from "./screens/market.js";
+import { bankScreen } from "./screens/bank.js";
 
 const SCREENS = {
   home: dashboardScreen,
   land: landScreen,
+  market: marketScreen,
+  bank: bankScreen,
 };
 
 function showScreen(state, screenId) {

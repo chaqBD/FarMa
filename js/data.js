@@ -5,18 +5,21 @@ export let CONFIG = {};
 export let BACKGROUNDS = [];
 export let CROPS = [];
 export let LAND_OPTIONS = [];
+export let MARKETS = [];
 
 export async function loadData() {
-  const [config, backgrounds, crops, landOptions] = await Promise.all([
+  const [config, backgrounds, crops, landOptions, markets] = await Promise.all([
     fetchJson("data/config.json"),
     fetchJson("data/backgrounds.json"),
     fetchJson("data/crops.json"),
     fetchJson("data/land.json"),
+    fetchJson("data/markets.json"),
   ]);
   CONFIG = config;
   BACKGROUNDS = backgrounds;
   CROPS = crops;
   LAND_OPTIONS = landOptions;
+  MARKETS = markets;
 }
 
 export function findCrop(id) {
@@ -25,6 +28,10 @@ export function findCrop(id) {
 
 export function findLandOption(id) {
   return LAND_OPTIONS.find((o) => o.id === id);
+}
+
+export function findMarket(id) {
+  return MARKETS.find((m) => m.id === id);
 }
 
 async function fetchJson(path) {

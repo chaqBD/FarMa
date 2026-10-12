@@ -1,0 +1,26 @@
+[
+  {
+    "id": "farm_gate",
+    "label": "Farm gate",
+    "description": "A buyer comes to you. No transport, no stress — but the lowest price.",
+    "priceMultiplier": 0.8,
+    "transportCostPerKg": 0,
+    "volumeCap": null
+  },
+  {
+    "id": "village_market",
+    "label": "Village market",
+    "description": "The weekly 5-day market. Friendly, fair, prices set by the elders.",
+    "priceMultiplier": 1.0,
+    "transportCostPerKg": 5,
+    "volumeCap": 500
+  },
+  {
+    "id": "mile12",
+    "label": "Mile 12 (Lagos wholesale)",
+    "description": "The big city market. Best prices, but transport costs and middlemen.",
+    "priceMultiplier": 1.3,
+    "transportCostPerKg": 20,
+    "volumeCap": null
+  }
+]

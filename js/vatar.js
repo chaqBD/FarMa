@@ -91,7 +91,7 @@ export async function checkPremiumEntitlement() {
   // indistinguishable from a legitimate { premium: false } — checking
   // the field's actual type, not just truthiness, keeps that case in
   // the "unknown" bucket too instead of reading as a confirmed non-owner.
-  if (!result.ok || typeof result.data.premium !== "boolean") {
+  if (!result.ok || typeof result.data?.premium !== "boolean") {
     return { available: false, premium: false };
   }
   return { available: true, premium: result.data.premium };

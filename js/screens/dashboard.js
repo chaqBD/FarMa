@@ -32,11 +32,11 @@ export function dashboardScreen(state, navigate) {
 
     const nav = navBar("home", navigate);
 
-    const header = el("header", { class: "dash-header" }, [
+    const header = el("header", { class: "dash-header" + (state.premium ? " premium" : "") }, [
       el("div", { class: "card-title-row" }, [
         el("img", { class: "avatar-badge", src: avatarSrc(state.player.gender), alt: state.player.name, width: "44", height: "44" }),
         el("div", {}, [
-          el("h1", {}, [state.player.farmName]),
+          el("h1", {}, [state.player.farmName, state.premium ? el("span", { class: "premium-badge", title: "Premium Farmer" }, [" ✨"]) : null]),
           el("p", { class: "subtitle" }, [
             `${state.player.name} · ${state.player.homeState} state`,
           ]),

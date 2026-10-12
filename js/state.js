@@ -53,6 +53,9 @@ export function newGameState({ name, gender, homeState, farmName, backgroundId }
     financeLog: [],
     workers: [],
     nextWorkerId: 1,
+    // Set true once this Vatar player's Premium Pass purchase is confirmed
+    // (see js/vatar.js). Purely cosmetic for now — see js/screens/bank.js.
+    premium: false,
     log: [
       `${farmName} is founded by ${name} in ${homeState}. ${background.perk}.`,
     ],
@@ -105,6 +108,7 @@ function withDefaults(state) {
   if (state.finances.lifetimeExpense === undefined) state.finances.lifetimeExpense = 0;
   if (!state.workers) state.workers = [];
   if (!state.nextWorkerId) state.nextWorkerId = 1;
+  if (state.premium === undefined) state.premium = false;
   return state;
 }
 

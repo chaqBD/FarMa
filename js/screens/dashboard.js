@@ -1,19 +1,9 @@
-import { el, formatNaira, toast } from "../ui.js";
+import { el, formatNaira } from "../ui.js";
 import { advanceDay, describeDate } from "../engine.js";
 import { clearSave, saveGame, STAT_LABELS } from "../state.js";
+import { navBar } from "./nav.js";
 
-const NAV_ITEMS = [
-  { id: "home", label: "Home", enabled: true },
-  { id: "land", label: "My Land", enabled: false },
-  { id: "shop", label: "Shop", enabled: false },
-  { id: "workers", label: "Workers", enabled: false },
-  { id: "livestock", label: "Livestock", enabled: false },
-  { id: "market", label: "Market", enabled: false },
-  { id: "bank", label: "Bank", enabled: false },
-  { id: "life", label: "Life", enabled: false },
-];
-
-export function dashboardScreen(state) {
+export function dashboardScreen(state, navigate) {
   const screen = el("div", { class: "screen dashboard" });
 
   function renderStatBar(stat) {
@@ -39,24 +29,7 @@ export function dashboardScreen(state) {
   function redraw() {
     screen.innerHTML = "";
 
-    const nav = el(
-      "nav",
-      { class: "nav-bar" },
-      NAV_ITEMS.map((item) =>
-        el(
-          "button",
-          {
-            type: "button",
-            class: "nav-btn" + (item.enabled ? "" : " disabled"),
-            title: item.enabled ? "" : "Coming soon",
-            onClick: () => {
-              if (!item.enabled) return toast(`${item.label}: coming soon`);
-            },
-          },
-          [item.label]
-        )
-      )
-    );
+    const nav = navBar("home", navigate);
 
     const header = el("header", { class: "dash-header" }, [
       el("div", {}, [

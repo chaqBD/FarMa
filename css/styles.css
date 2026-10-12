@@ -141,6 +141,7 @@ input, select {
   font-size: 0.85rem;
 }
 .nav-btn.disabled { opacity: 0.45; border-color: #c9c0ae; color: var(--muted); cursor: not-allowed; }
+.nav-btn.active { background: var(--green); color: white; }
 
 .card-grid {
   display: grid;
@@ -178,6 +179,29 @@ input, select {
   font-size: 0.9rem;
   z-index: 100;
 }
+
+/* Land screen */
+.land-screen .muted { color: var(--muted); font-size: 0.9rem; }
+.land-option-card .cash { color: var(--orange); font-weight: bold; margin: 6px 0; }
+.plot-card { display: flex; flex-direction: column; gap: 8px; }
+.button-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.secondary-btn {
+  flex: 1 1 auto;
+  padding: 10px 12px;
+  background: var(--cream);
+  color: var(--soil);
+  border: 1px solid var(--soil);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.secondary-btn:hover { background: #f1e6d2; }
+.stat-fill.growth { background: var(--green); }
+.status-ready { color: var(--green); font-weight: 600; }
+.plant-form { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.plant-form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+.lease-more { margin-top: 16px; }
+.lease-more summary { cursor: pointer; color: var(--green); font-weight: 600; margin-bottom: 10px; }
 
 @media (max-width: 480px) {
   .screen { padding: 12px; }

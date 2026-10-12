@@ -1,0 +1,42 @@
+[
+  {
+    "id": "maize",
+    "name": "Maize",
+    "cycleDays": 100,
+    "baseYieldKg": 800,
+    "basePricePerKg": 350,
+    "soilFit": { "loamy": 1.0, "sandy": 0.75, "clay": 0.7, "fadama": 0.85 }
+  },
+  {
+    "id": "cassava",
+    "name": "Cassava",
+    "cycleDays": 270,
+    "baseYieldKg": 2200,
+    "basePricePerKg": 180,
+    "soilFit": { "loamy": 1.1, "sandy": 0.9, "clay": 0.8, "fadama": 0.85 }
+  },
+  {
+    "id": "tomato",
+    "name": "Tomato",
+    "cycleDays": 75,
+    "baseYieldKg": 1400,
+    "basePricePerKg": 420,
+    "soilFit": { "loamy": 1.1, "sandy": 0.8, "clay": 0.7, "fadama": 0.9 }
+  },
+  {
+    "id": "pepper",
+    "name": "Pepper (tatashe)",
+    "cycleDays": 90,
+    "baseYieldKg": 900,
+    "basePricePerKg": 600,
+    "soilFit": { "loamy": 1.05, "sandy": 0.85, "clay": 0.7, "fadama": 0.85 }
+  },
+  {
+    "id": "yam",
+    "name": "Yam",
+    "cycleDays": 240,
+    "baseYieldKg": 1600,
+    "basePricePerKg": 450,
+    "soilFit": { "loamy": 1.05, "sandy": 0.8, "clay": 0.75, "fadama": 0.7 }
+  }
+]

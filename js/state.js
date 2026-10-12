@@ -46,6 +46,8 @@ export function newGameState({ name, gender, homeState, farmName, backgroundId }
       startingAsset: background.startingAsset,
     },
     time: { ...CONFIG.startDate },
+    land: [],
+    inventory: {},
     log: [
       `${farmName} is founded by ${name} in ${homeState}. ${background.perk}.`,
     ],

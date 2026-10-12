@@ -1,7 +1,7 @@
 import { el, formatNaira, toast, icon } from "../ui.js";
 import { totals } from "../finance.js";
 import { saveGame, pushLog } from "../state.js";
-import { isVatarAvailable, purchasePremium } from "../vatar.js";
+import { isEmbeddedInLagosLife, purchasePremium } from "../vatar.js";
 import { navBar } from "./nav.js";
 
 const TYPE_LABELS = {
@@ -32,7 +32,7 @@ export function bankScreen(state, navigate) {
       el("p", { class: "muted" }, ["A one-time pass with a gold farmer badge and theme — more perks on the way."]),
     ];
 
-    if (!isVatarAvailable()) {
+    if (!isEmbeddedInLagosLife()) {
       body.push(el("p", { class: "muted" }, ["Open FaRma inside Lagos Life to buy the Premium Pass."]));
     } else {
       body.push(

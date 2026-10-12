@@ -12,6 +12,18 @@ export function isVatarAvailable() {
   return typeof window !== "undefined" && typeof window.Vatar === "object" && window.Vatar !== null;
 }
 
+/**
+ * Whether FaRma is actually embedded in Lagos Life right now — unlike
+ * isVatarAvailable(), which only checks that the SDK script loaded.
+ * Standalone hosts (e.g. the public GitHub Pages link) still load the
+ * script fine but Vatar.init() rejects with "not_framed" there, so
+ * isVatarAvailable() alone isn't a safe check for whether to show
+ * purchase UI. Only meaningful after initVatar() has resolved.
+ */
+export function isEmbeddedInLagosLife() {
+  return initResult !== null;
+}
+
 export async function initVatar() {
   if (initResult !== null) return initResult;
   if (!isVatarAvailable()) return null;

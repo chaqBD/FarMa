@@ -29,10 +29,12 @@ function showScreen(state, screenId) {
 /**
  * Syncs Premium Pass status from Vatar in the background, after the game
  * has already rendered — this never blocks first paint, and is a silent
- * no-op when FaRma is played standalone outside Lagos Life. Redraws the
- * current screen only if the player's status actually changed (e.g. they
- * bought the pass on another device, or a purchase that was interrupted
- * mid-game just got confirmed).
+ * no-op when FaRma is played standalone outside Lagos Life. Always
+ * redraws the current screen once Vatar finishes initializing (not only
+ * when state.premium changes): the Bank screen's UI also depends on
+ * isEmbeddedInLagosLife(), which flips from unknown to known right here,
+ * and that transition needs to reach the screen even on a run where the
+ * player doesn't already own the pass.
  */
 async function syncPremiumStatus(state) {
   const vatarInfo = await initVatar();
@@ -40,11 +42,11 @@ async function syncPremiumStatus(state) {
 
   await restoreInterruptedPurchases();
   const { available, premium } = await checkPremiumEntitlement();
-  if (!available || premium === state.premium) return;
-
-  state.premium = premium;
-  if (premium) pushLog(state, "Premium Pass unlocked! ✨");
-  saveGame(state);
+  if (available && premium !== state.premium) {
+    state.premium = premium;
+    if (premium) pushLog(state, "Premium Pass unlocked! ✨");
+    saveGame(state);
+  }
   showScreen(state, currentScreenId);
 }
 

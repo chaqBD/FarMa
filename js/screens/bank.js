@@ -1,7 +1,7 @@
 import { el, formatNaira, toast, icon } from "../ui.js";
 import { totals } from "../finance.js";
 import { saveGame, pushLog } from "../state.js";
-import { isVatarAvailable, purchasePremium } from "../vatar.js";
+import { isEmbeddedInLagosLife, ensureVatarSynced, purchasePremium } from "../vatar.js";
 import { navBar } from "./nav.js";
 
 const TYPE_LABELS = {
@@ -18,6 +18,47 @@ const TYPE_LABELS = {
 export function bankScreen(state, navigate) {
   const screen = el("div", { class: "screen bank-screen" });
   let buying = false;
+  let retryInFlight = false;
+  // Flips false once the player navigates away from this screen instance,
+  // so an async continuation (the retry below, or the buy handler further
+  // down) that resolves after that doesn't call redraw() on a now-
+  // detached DOM node. State changes (saveGame/pushLog) still apply either
+  // way — this only guards the redraw.
+  let active = true;
+  const leavingNavigate = (nextId) => {
+    active = false;
+    navigate(nextId);
+  };
+
+  // ensureVatarSynced() dedups against any other in-flight/settled attempt
+  // this session (including main.js's own startup call) and syncs Premium
+  // ownership as part of the same attempt — retryInFlight here just stops
+  // this screen instance from awaiting it more than once concurrently.
+  function maybeSync() {
+    if (retryInFlight) return;
+    retryInFlight = true;
+    ensureVatarSynced(state).then((result) => {
+      retryInFlight = false;
+      // embedded:false means standalone or a failed attempt — nothing
+      // changed, so skip the redraw entirely. Redrawing here would
+      // re-invoke renderPremiumCard(), which calls maybeSync() again
+      // whenever still not embedded: on a genuinely standalone host,
+      // that's an infinite sync-then-redraw loop, not a bounded retry.
+      if (!result?.embedded) return;
+      if (result.premiumChanged) {
+        pushLog(state, "Premium Pass unlocked! ✨");
+        saveGame(state);
+      }
+      if (active) redraw();
+    }).catch((err) => {
+      // Without this, a rejection (e.g. the entitlement fetch throwing)
+      // leaves retryInFlight stuck true forever for this screen instance,
+      // since the .then() above — the only place that resets it — would
+      // never run.
+      retryInFlight = false;
+      console.warn("Premium sync failed:", err);
+    });
+  }
 
   function renderPremiumCard() {
     if (state.premium) {
@@ -32,7 +73,8 @@ export function bankScreen(state, navigate) {
       el("p", { class: "muted" }, ["A one-time pass with a gold farmer badge and theme — more perks on the way."]),
     ];
 
-    if (!isVatarAvailable()) {
+    if (!isEmbeddedInLagosLife()) {
+      maybeSync();
       body.push(el("p", { class: "muted" }, ["Open FaRma inside Lagos Life to buy the Premium Pass."]));
     } else {
       body.push(
@@ -50,13 +92,13 @@ export function bankScreen(state, navigate) {
               buying = false;
               if (!result.ok) {
                 toast(result.message);
-                redraw();
+                if (active) redraw();
                 return;
               }
               state.premium = true;
               pushLog(state, "Bought the Premium Pass! ✨");
               saveGame(state);
-              redraw();
+              if (active) redraw();
             },
           },
           [buying ? "Opening pay sheet…" : "Buy Premium Pass"]
@@ -101,7 +143,7 @@ export function bankScreen(state, navigate) {
     ]);
 
     screen.appendChild(el("h1", {}, ["Bank"]));
-    screen.appendChild(navBar("bank", navigate));
+    screen.appendChild(navBar("bank", leavingNavigate));
     screen.appendChild(summary);
     screen.appendChild(renderPremiumCard());
     screen.appendChild(ledger);

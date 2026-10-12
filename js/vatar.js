@@ -12,23 +12,52 @@ export function isVatarAvailable() {
   return typeof window !== "undefined" && typeof window.Vatar === "object" && window.Vatar !== null;
 }
 
-export async function initVatar() {
-  if (initResult !== null) return initResult;
-  if (!isVatarAvailable()) return null;
-  try {
-    const { player, mode } = await window.Vatar.init();
-    initResult = { player, mode };
-    // Catches a purchase that was confirmed while the player was away
-    // (e.g. they left to pay on the provider's page and the game reloaded).
-    window.Vatar.onPurchase((p) => {
-      if (p.productId !== PRODUCT_ID) return;
-      claimPurchase(p.purchaseId).catch((err) => console.warn("claimPurchase (onPurchase) failed:", err));
-    });
-    return initResult;
-  } catch (err) {
-    console.warn("Vatar.init() unavailable:", err?.code || err);
-    return null;
-  }
+/**
+ * Whether FaRma is actually embedded in Lagos Life right now — unlike
+ * isVatarAvailable(), which only checks that the SDK script loaded.
+ * Standalone hosts (e.g. the public GitHub Pages link) still load the
+ * script fine but Vatar.init() rejects with "not_framed" there, so
+ * isVatarAvailable() alone isn't a safe check for whether to show
+ * purchase UI. Only meaningful after initVatar() has resolved.
+ */
+export function isEmbeddedInLagosLife() {
+  return initResult !== null;
+}
+
+let initPromise = null; // in-flight dedup, separate from initResult (the settled cache)
+
+/**
+ * Calls Vatar.init(), exactly once no matter how many places call this
+ * concurrently — concurrent callers share the same in-flight promise
+ * instead of each starting a real Vatar.init() call (which would also
+ * each register their own onPurchase listener, double-handling the next
+ * purchase confirmation). Resets after a failure so a later legitimate
+ * retry can start a fresh attempt.
+ */
+export function initVatar() {
+  if (initResult !== null) return Promise.resolve(initResult);
+  if (!isVatarAvailable()) return Promise.resolve(null);
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    try {
+      const { player, mode } = await window.Vatar.init();
+      initResult = { player, mode };
+      // Catches a purchase that was confirmed while the player was away
+      // (e.g. they left to pay on the provider's page and the game reloaded).
+      window.Vatar.onPurchase((p) => {
+        if (p.productId !== PRODUCT_ID) return;
+        claimPurchase(p.purchaseId).catch((err) => console.warn("claimPurchase (onPurchase) failed:", err));
+      });
+      return initResult;
+    } catch (err) {
+      console.warn("Vatar.init() unavailable:", err?.code || err);
+      return null;
+    } finally {
+      initPromise = null;
+    }
+  })();
+  return initPromise;
 }
 
 export function getPlayer() {
@@ -62,13 +91,27 @@ async function claimPurchase(purchaseId) {
   return callFunction("/claim", { session, purchaseId });
 }
 
-/** Checks whether this Vatar player already owns the Premium Pass, independent of this device's local save. */
+/**
+ * Checks whether this Vatar player already owns the Premium Pass,
+ * independent of this device's local save. `available: false` means we
+ * couldn't get a definitive answer (no session, or the request failed) —
+ * callers must treat that as "unknown", never as "confirmed not premium",
+ * so a transient network/server hiccup can never downgrade a player who
+ * already owns the pass.
+ */
 export async function checkPremiumEntitlement() {
   const session = await freshSession();
   if (!session) return { available: false, premium: false };
   const result = await callFunction("/entitlement", { session });
-  if (!result.ok) return { available: true, premium: false };
-  return { available: true, premium: Boolean(result.data.premium) };
+  // callFunction swallows JSON parse failures into {} (see its own
+  // .catch), so a malformed/truncated 200 response is otherwise
+  // indistinguishable from a legitimate { premium: false } — checking
+  // the field's actual type, not just truthiness, keeps that case in
+  // the "unknown" bucket too instead of reading as a confirmed non-owner.
+  if (!result.ok || typeof result.data?.premium !== "boolean") {
+    return { available: false, premium: false };
+  }
+  return { available: true, premium: result.data.premium };
 }
 
 const PURCHASE_ERROR_MESSAGES = {
@@ -117,4 +160,68 @@ export async function restoreInterruptedPurchases() {
   } catch (err) {
     console.warn("restoreInterruptedPurchases failed:", err?.code || err);
   }
+}
+
+/**
+ * Restores interrupted purchases and brings state.premium in line with
+ * what Vatar says this player owns. Mutates state.premium directly;
+ * callers own saving/logging/redrawing, since those are app concerns
+ * this module otherwise stays free of. Returns whether it changed.
+ */
+async function syncPremiumFromVatar(state) {
+  await restoreInterruptedPurchases();
+  const { available, premium } = await checkPremiumEntitlement();
+  if (!available || premium === state.premium) return false;
+  state.premium = premium;
+  return true;
+}
+
+let syncPromise = null; // dedups the whole init-then-sync flow, same reasoning as initPromise above
+
+/**
+ * The one entry point for "make sure Vatar is initialized and, if
+ * embedded, that state.premium reflects reality" — safe to call from
+ * multiple places (main.js at startup, the Bank screen on every render)
+ * without duplicating work or racing: every caller *during the same
+ * attempt* shares the same in-flight promise, so the entitlement sync
+ * that follows a successful init happens exactly once regardless of how
+ * many places call this concurrently. Returns { embedded, premiumChanged }.
+ *
+ * A failed attempt is deliberately *not* cached permanently — each call
+ * after a failure starts a fresh attempt (initVatar() itself only
+ * resets its own in-flight guard on failure too, so this stays
+ * consistent with it), rather than remembering a stale "never embedded"
+ * answer that a later, legitimately-embedded sync could get stuck
+ * behind. The cost is one extra harmless attempt per Bank screen visit
+ * on a host that can never embed (e.g. the standalone GitHub Pages
+ * link) — bounded by the player's own navigation, not a loop, and
+ * worth it to never leave a real purchase unsynced for the rest of a
+ * session over one slow handshake.
+ */
+export function ensureVatarSynced(state) {
+  if (!syncPromise) {
+    syncPromise = (async () => {
+      try {
+        const info = await initVatar();
+        if (!info) return { embedded: false, premiumChanged: false };
+        const premiumChanged = await syncPremiumFromVatar(state);
+        return { embedded: true, premiumChanged };
+      } catch (err) {
+        // Not just an init() failure (which initVatar() itself already
+        // handles without throwing) — this also covers the entitlement
+        // check throwing after a *successful* init (e.g. the fetch in
+        // checkPremiumEntitlement's callFunction rejecting outright,
+        // which isn't try/caught there). Without resetting here too,
+        // that leaves this cached rejected promise permanently disabling
+        // every future sync this session, even though init itself is
+        // fine — exactly the "not cached permanently" guarantee this
+        // function documents above.
+        console.warn("ensureVatarSynced failed:", err);
+        return { embedded: false, premiumChanged: false };
+      } finally {
+        syncPromise = null;
+      }
+    })();
+  }
+  return syncPromise;
 }

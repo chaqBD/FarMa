@@ -6,12 +6,14 @@ import { dashboardScreen } from "./screens/dashboard.js";
 import { landScreen } from "./screens/land.js";
 import { marketScreen } from "./screens/market.js";
 import { bankScreen } from "./screens/bank.js";
+import { workersScreen } from "./screens/workers.js";
 
 const SCREENS = {
   home: dashboardScreen,
   land: landScreen,
   market: marketScreen,
   bank: bankScreen,
+  workers: workersScreen,
 };
 
 function showScreen(state, screenId) {

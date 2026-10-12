@@ -4,7 +4,7 @@ export const NAV_ITEMS = [
   { id: "home", label: "Home", enabled: true },
   { id: "land", label: "My Land", enabled: true },
   { id: "shop", label: "Shop", enabled: false },
-  { id: "workers", label: "Workers", enabled: false },
+  { id: "workers", label: "Workers", enabled: true },
   { id: "livestock", label: "Livestock", enabled: false },
   { id: "market", label: "Market", enabled: true },
   { id: "bank", label: "Bank", enabled: true },

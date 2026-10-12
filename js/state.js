@@ -51,6 +51,8 @@ export function newGameState({ name, gender, homeState, farmName, backgroundId }
     land: [],
     inventory: {},
     financeLog: [],
+    workers: [],
+    nextWorkerId: 1,
     log: [
       `${farmName} is founded by ${name} in ${homeState}. ${background.perk}.`,
     ],
@@ -101,6 +103,8 @@ function withDefaults(state) {
   if (!state.financeLog) state.financeLog = [];
   if (state.finances.lifetimeIncome === undefined) state.finances.lifetimeIncome = 0;
   if (state.finances.lifetimeExpense === undefined) state.finances.lifetimeExpense = 0;
+  if (!state.workers) state.workers = [];
+  if (!state.nextWorkerId) state.nextWorkerId = 1;
   return state;
 }
 

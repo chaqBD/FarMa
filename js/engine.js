@@ -1,5 +1,6 @@
 import { CONFIG } from "./data.js";
 import { seasonForMonth, monthName } from "./state.js";
+import { growPlots } from "./crops.js";
 
 /**
  * Advances the game clock by one day, mutating state in place. Returns a
@@ -24,6 +25,8 @@ export function advanceDay(state) {
   const resting = state.player.restingStats;
   state.player.stats.energy = drift(state.player.stats.energy, resting.energy, 2);
   state.player.stats.health = drift(state.player.stats.health, resting.health, 1);
+
+  growPlots(state);
 
   return describeDate(state.time);
 }

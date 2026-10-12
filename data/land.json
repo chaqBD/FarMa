@@ -1,0 +1,26 @@
+[
+  {
+    "id": "backyard",
+    "label": "Backyard plot",
+    "areaLabel": "~0.05 ha",
+    "plots": 1,
+    "leaseCost": 20000,
+    "soils": ["loamy"]
+  },
+  {
+    "id": "small_farm",
+    "label": "Small farm",
+    "areaLabel": "1–2 hectares",
+    "plots": 3,
+    "leaseCost": 80000,
+    "soils": ["loamy", "sandy", "clay"]
+  },
+  {
+    "id": "medium_farm",
+    "label": "Medium farm",
+    "areaLabel": "5–20 hectares",
+    "plots": 8,
+    "leaseCost": 250000,
+    "soils": ["loamy", "sandy", "clay", "fadama"]
+  }
+]

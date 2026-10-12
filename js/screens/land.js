@@ -47,17 +47,20 @@ export function landScreen(state, navigate) {
 
   function renderPlantForm(plotIndex, plot) {
     let selectedCropId = CROPS[0].id;
-    const cropPicker = el("div", { class: "crop-picker" });
+    const cropPicker = el("div", { class: "crop-picker", role: "group", "aria-label": "Choose a crop to plant" });
 
     function drawCropPicker() {
       cropPicker.innerHTML = "";
       for (const c of CROPS) {
         const fit = soilFitLabel(c, plot.soil);
+        const isSelected = c.id === selectedCropId;
         const chip = el(
           "button",
           {
             type: "button",
-            class: "crop-chip" + (c.id === selectedCropId ? " selected" : "") + " fit-" + fit.replace(" ", "-"),
+            class: "crop-chip" + (isSelected ? " selected" : "") + " fit-" + fit.replace(" ", "-"),
+            "aria-pressed": isSelected ? "true" : "false",
+            "aria-label": `${c.name}, ${fit}`,
             onClick: () => { selectedCropId = c.id; drawCropPicker(); },
           },
           [icon(c.id, 32), el("span", {}, [c.name]), el("span", { class: "fit-label" }, [fit])]

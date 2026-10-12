@@ -345,4 +345,7 @@ input, select {
 @media (max-width: 480px) {
   .screen { padding: 12px; }
   .cash-display { font-size: 1rem; }
+  /* .hero's negative margin cancels .screen's padding so the banner
+     reaches the screen edges; it must match whatever that padding is. */
+  .hero { margin: -12px -12px 20px; }
 }

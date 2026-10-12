@@ -39,3 +39,33 @@ export function toast(message) {
   document.body.appendChild(node);
   setTimeout(() => node.remove(), 2200);
 }
+
+/**
+ * Shows a blocking modal for a random event with its choice buttons.
+ * onChoice(index) is called once, then the modal removes itself.
+ */
+export function showEventModal(event, onChoice) {
+  const overlay = el("div", { class: "modal-overlay" });
+  const choose = (index) => {
+    overlay.remove();
+    onChoice(index);
+  };
+  const card = el("div", { class: "modal-card" }, [
+    el("p", { class: "modal-category" }, [event.category]),
+    el("h2", {}, [event.title]),
+    el("p", {}, [event.body]),
+    el(
+      "div",
+      { class: "modal-choices" },
+      event.choices.map((choice, index) =>
+        el(
+          "button",
+          { class: "primary-btn", type: "button", onClick: () => choose(index) },
+          [choice.label]
+        )
+      )
+    ),
+  ]);
+  overlay.appendChild(card);
+  document.body.appendChild(overlay);
+}

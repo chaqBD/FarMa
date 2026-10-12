@@ -1,0 +1,294 @@
+[
+  {
+    "id": "late_rains",
+    "category": "Weather",
+    "title": "The rains are late",
+    "body": "It's planting season but the sky has stayed dry for two weeks longer than usual. Your growing crops are stressed.",
+    "weight": 4,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Pay for emergency water trucking (₦8,000)", "effect": { "cashDelta": -8000 }, "resultText": "A water truck saved the crop from the worst of it." },
+      { "label": "Wait it out", "effect": { "randomGrowingPlotCareDelta": -15 }, "resultText": "The dry spell set your crop back a little." }
+    ]
+  },
+  {
+    "id": "flash_flood",
+    "category": "Weather",
+    "title": "Flash flood!",
+    "body": "Heavy rain overnight flooded your lowest plot. Workers are already out there with buckets.",
+    "weight": 3,
+    "requires": "anyLand",
+    "choices": [
+      { "label": "Pay for emergency drainage work (₦12,000)", "effect": { "cashDelta": -12000 }, "resultText": "The drainage crew got the water out before real damage was done." },
+      { "label": "Let the water find its own way out", "effect": { "randomPlotReadinessDelta": -20 }, "resultText": "The standing water left the soil in bad shape." }
+    ]
+  },
+  {
+    "id": "windstorm",
+    "category": "Weather",
+    "title": "Windstorm flattens part of a plot",
+    "body": "A sudden windstorm tore through overnight, flattening stalks on one of your growing plots.",
+    "weight": 3,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Send workers to prop up what's left (costs Energy)", "effect": { "energyDelta": -15, "randomGrowingPlotCareDelta": -5 }, "resultText": "Hard work saved most of the crop." },
+      { "label": "Assess the damage later", "effect": { "randomGrowingPlotCareDelta": -20 }, "resultText": "Without quick attention, the damage spread." }
+    ]
+  },
+  {
+    "id": "harmattan_dust",
+    "category": "Weather",
+    "title": "Harmattan dust settles in",
+    "body": "The dry harmattan wind is coating everything in dust, and your crops are drinking more water than usual.",
+    "weight": 3,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Water by hand (costs Energy)", "effect": { "energyDelta": -10 }, "resultText": "A bit of extra effort kept the crop healthy." },
+      { "label": "Let the crop tough it out", "effect": { "randomGrowingPlotCareDelta": -10 }, "resultText": "The dust and dryness took a toll." }
+    ]
+  },
+  {
+    "id": "good_rain_spell",
+    "category": "Weather",
+    "title": "A perfect rain spell",
+    "body": "Steady, gentle rain fell for three days straight — exactly what your growing crops needed.",
+    "weight": 2,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Enjoy the free boost", "effect": { "randomGrowingPlotCareDelta": 15 }, "resultText": "Your crops are looking lush." }
+    ]
+  },
+  {
+    "id": "armyworm_outbreak",
+    "category": "Pests & disease",
+    "title": "Fall armyworm spotted",
+    "body": "A neighbour's farm has fall armyworm, and scouts say it's heading your way.",
+    "weight": 4,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Spray immediately (₦10,000)", "effect": { "cashDelta": -10000 }, "resultText": "Quick spraying stopped the worm in its tracks." },
+      { "label": "Hope it passes you by", "effect": { "randomGrowingPlotCareDelta": -25 }, "resultText": "It didn't pass you by. The crop took real damage." }
+    ]
+  },
+  {
+    "id": "locust_swarm",
+    "category": "Pests & disease",
+    "title": "Locusts on the horizon",
+    "body": "A swarm has been seen two villages over. Farmers are banging pots and lighting fires to scare them off.",
+    "weight": 2,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Hire extra hands to scare them off (₦9,000)", "effect": { "cashDelta": -9000 }, "resultText": "The noise and smoke kept the swarm moving past your land." },
+      { "label": "Stay indoors and hope", "effect": { "randomGrowingPlotCareDelta": -20 }, "resultText": "The swarm settled for a day. Some damage is done." }
+    ]
+  },
+  {
+    "id": "quelea_birds",
+    "category": "Pests & disease",
+    "title": "Quelea birds descend on the grain",
+    "body": "A cloud of quelea birds has found your field at the worst possible time.",
+    "weight": 3,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Pay boys with catapults to scare them (₦5,000)", "effect": { "cashDelta": -5000 }, "resultText": "The birds moved on to easier pickings." },
+      { "label": "Let them feed", "effect": { "randomGrowingPlotCareDelta": -12 }, "resultText": "The birds had a good meal at your expense." }
+    ]
+  },
+  {
+    "id": "rodent_raid",
+    "category": "Pests & disease",
+    "title": "Rats in the store",
+    "body": "You find gnaw marks on your stored produce this morning.",
+    "weight": 3,
+    "requires": "inventory",
+    "choices": [
+      { "label": "Buy traps and bait (₦4,000)", "effect": { "cashDelta": -4000, "inventoryLossPercent": 3 }, "resultText": "The traps caught most of them before more damage was done." },
+      { "label": "Deal with it later", "effect": { "inventoryLossPercent": 15 }, "resultText": "The rats had the run of the store for days." }
+    ]
+  },
+  {
+    "id": "weevil_infestation",
+    "category": "Pests & disease",
+    "title": "Weevils in the grain store",
+    "body": "Some of your stored grain is showing the telltale holes of a weevil infestation.",
+    "weight": 2,
+    "requires": "inventory",
+    "choices": [
+      { "label": "Fumigate immediately (₦7,000)", "effect": { "cashDelta": -7000, "inventoryLossPercent": 2 }, "resultText": "Fumigation stopped the spread." },
+      { "label": "Sort through it yourself (costs Energy)", "effect": { "energyDelta": -10, "inventoryLossPercent": 8 }, "resultText": "You saved most of it, but it took a toll." }
+    ]
+  },
+  {
+    "id": "night_theft",
+    "category": "Security",
+    "title": "Thieves in the night",
+    "body": "You wake to find part of your store has been raided overnight.",
+    "weight": 2,
+    "requires": "inventory",
+    "choices": [
+      { "label": "Report to the village head and tighten security (₦6,000)", "effect": { "cashDelta": -6000, "inventoryLossPercent": 5 }, "resultText": "The village head promised to keep an eye out." },
+      { "label": "Say nothing and move on", "effect": { "inventoryLossPercent": 12 }, "resultText": "Word gets around that your farm is an easy target." }
+    ]
+  },
+  {
+    "id": "herder_grazing",
+    "category": "Security",
+    "title": "Cattle in the field",
+    "body": "A herder's cattle have strayed onto your land and grazed down part of a growing plot overnight.",
+    "weight": 3,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Talk it through with the herder, ask for compensation", "effect": { "cashDelta": 3000, "randomGrowingPlotCareDelta": -10, "reputationDelta": 2 }, "resultText": "The herder apologised and paid something toward the damage." },
+      { "label": "Build a quick fence to stop it happening again (₦9,000)", "effect": { "cashDelta": -9000, "randomGrowingPlotCareDelta": -10 }, "resultText": "The fence should keep cattle out going forward." }
+    ]
+  },
+  {
+    "id": "community_settlement",
+    "category": "Security",
+    "title": "The youths want \"something small\"",
+    "body": "A group of community youths stop by, hinting that a \"settlement\" would keep things smooth for your farm.",
+    "weight": 2,
+    "requires": "anyLand",
+    "choices": [
+      { "label": "Pay them off (₦7,000)", "effect": { "cashDelta": -7000, "reputationDelta": 3 }, "resultText": "They leave satisfied, and word of your generosity spreads." },
+      { "label": "Politely refuse", "effect": { "reputationDelta": -5 }, "resultText": "They leave unhappy. That could come back around." }
+    ]
+  },
+  {
+    "id": "land_dispute",
+    "category": "Security",
+    "title": "A boundary dispute",
+    "body": "A neighbour claims your fence line crosses onto their land.",
+    "weight": 2,
+    "requires": "anyLand",
+    "choices": [
+      { "label": "Hire a surveyor to settle it properly (₦15,000)", "effect": { "cashDelta": -15000, "reputationDelta": 3 }, "resultText": "The survey proved your boundary was correct, and it's now on record." },
+      { "label": "Argue it out yourself", "effect": { "reputationDelta": -3, "energyDelta": -10 }, "resultText": "A tense afternoon, with nothing really resolved." }
+    ]
+  },
+  {
+    "id": "fuel_price_hike",
+    "category": "Economy",
+    "title": "Fuel prices spike",
+    "body": "News on the radio: fuel prices have jumped overnight, and everything that depends on transport just got pricier.",
+    "weight": 3,
+    "requires": "always",
+    "choices": [
+      { "label": "Absorb the cost this season", "effect": { "cashDelta": -6000 }, "resultText": "It stings, but the farm carries on." }
+    ]
+  },
+  {
+    "id": "naira_devaluation",
+    "category": "Economy",
+    "title": "The naira slides again",
+    "body": "Another currency devaluation means imported fertiliser and chemicals cost more this month.",
+    "weight": 2,
+    "requires": "always",
+    "choices": [
+      { "label": "Note it and budget around it", "effect": { "cashDelta": -8000 }, "resultText": "You tighten the belt a little this season." }
+    ]
+  },
+  {
+    "id": "quick_sale_opportunity",
+    "category": "Economy",
+    "title": "A buyer comes looking",
+    "body": "A trader passing through town is paying premium cash for farm produce today — no haggling required.",
+    "weight": 3,
+    "requires": "inventory",
+    "choices": [
+      { "label": "Sell her a share on the spot", "effect": { "cashDelta": 18000, "inventoryLossPercent": 10 }, "resultText": "Quick, easy cash, no stress." },
+      { "label": "Hold out for your usual market", "effect": {}, "resultText": "You stick to your plan." }
+    ]
+  },
+  {
+    "id": "import_ban_boost",
+    "category": "Economy",
+    "title": "Import ban lifts local prices",
+    "body": "Government has banned a key import, and local produce prices are climbing as a result.",
+    "weight": 2,
+    "requires": "always",
+    "choices": [
+      { "label": "Good news for the farm", "effect": { "cashDelta": 12000 }, "resultText": "A welcome bit of extra income this season." }
+    ]
+  },
+  {
+    "id": "family_request",
+    "category": "People",
+    "title": "Family needs help",
+    "body": "A relative calls asking for help with a school fee emergency.",
+    "weight": 3,
+    "requires": "always",
+    "choices": [
+      { "label": "Send what you can (₦10,000)", "effect": { "cashDelta": -10000, "reputationDelta": 3 }, "resultText": "Family is pleased, and word of your generosity travels." },
+      { "label": "Explain the farm can't spare it right now", "effect": { "reputationDelta": -2 }, "resultText": "It's an uncomfortable call, but the cash stays in the business." }
+    ]
+  },
+  {
+    "id": "politician_photo_op",
+    "category": "People",
+    "title": "A politician wants a photo",
+    "body": "A local politician's team asks to use your farm for a campaign photo, promising \"good things\" in return.",
+    "weight": 2,
+    "requires": "anyLand",
+    "choices": [
+      { "label": "Let them come through", "effect": { "networkDelta": 6, "reputationDelta": -2 }, "resultText": "Useful contacts, but some neighbours grumble about the association." },
+      { "label": "Decline politely", "effect": { "reputationDelta": 2 }, "resultText": "You keep the farm out of politics." }
+    ]
+  },
+  {
+    "id": "ngo_training",
+    "category": "People",
+    "title": "An NGO offers free training",
+    "body": "An agricultural NGO is running a free training session nearby on modern farming techniques.",
+    "weight": 3,
+    "requires": "always",
+    "choices": [
+      { "label": "Attend (costs a day's Energy)", "effect": { "energyDelta": -20, "farmingSkillDelta": 4 }, "resultText": "You picked up a few techniques worth knowing." },
+      { "label": "Skip it, too busy", "effect": {}, "resultText": "Maybe next time." }
+    ]
+  },
+  {
+    "id": "bumper_conditions",
+    "category": "Lucky breaks",
+    "title": "Everything is growing beautifully",
+    "body": "Conditions have lined up perfectly this season — good sun, good rain, healthy soil.",
+    "weight": 2,
+    "requires": "landWithCrop",
+    "choices": [
+      { "label": "Take the win", "effect": { "randomGrowingPlotCareDelta": 20 }, "resultText": "Your crop is thriving." }
+    ]
+  },
+  {
+    "id": "ngo_grant",
+    "category": "Lucky breaks",
+    "title": "You've been picked for a youth-in-agric grant",
+    "body": "An NGO programme has selected your farm for a small cash grant.",
+    "weight": 1,
+    "requires": "always",
+    "choices": [
+      { "label": "Accept the grant", "effect": { "cashDelta": 35000, "reputationDelta": 2 }, "resultText": "A welcome boost to the books." }
+    ]
+  },
+  {
+    "id": "viral_video",
+    "category": "Lucky breaks",
+    "title": "Your farm goes viral",
+    "body": "Someone posted a video of your farm online, and it's picking up real attention.",
+    "weight": 1,
+    "requires": "always",
+    "choices": [
+      { "label": "Enjoy the moment", "effect": { "reputationDelta": 8, "networkDelta": 4 }, "resultText": "New contacts are already reaching out." }
+    ]
+  },
+  {
+    "id": "neighbourly_help",
+    "category": "People",
+    "title": "A neighbour lends a hand",
+    "body": "Seeing you stretched thin this week, a neighbouring farmer shows up to help with chores, no charge.",
+    "weight": 2,
+    "requires": "always",
+    "choices": [
+      { "label": "Gratefully accept", "effect": { "energyDelta": 15, "reputationDelta": 2 }, "resultText": "A good turn, and a friendship strengthened." }
+    ]
+  }
+]

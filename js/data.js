@@ -6,20 +6,23 @@ export let BACKGROUNDS = [];
 export let CROPS = [];
 export let LAND_OPTIONS = [];
 export let MARKETS = [];
+export let EVENTS = [];
 
 export async function loadData() {
-  const [config, backgrounds, crops, landOptions, markets] = await Promise.all([
+  const [config, backgrounds, crops, landOptions, markets, events] = await Promise.all([
     fetchJson("data/config.json"),
     fetchJson("data/backgrounds.json"),
     fetchJson("data/crops.json"),
     fetchJson("data/land.json"),
     fetchJson("data/markets.json"),
+    fetchJson("data/events.json"),
   ]);
   CONFIG = config;
   BACKGROUNDS = backgrounds;
   CROPS = crops;
   LAND_OPTIONS = landOptions;
   MARKETS = markets;
+  EVENTS = events;
 }
 
 export function findCrop(id) {

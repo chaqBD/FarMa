@@ -9,7 +9,7 @@ export const STAT_LABELS = {
   network: "Network",
 };
 
-function clampStat(value) {
+export function clampStat(value) {
   return Math.max(CONFIG.statRange.min, Math.min(CONFIG.statRange.max, value));
 }
 

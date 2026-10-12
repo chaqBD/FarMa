@@ -1,8 +1,8 @@
 import { el, formatNaira, toast } from "../ui.js";
-import { CROPS, LAND_OPTIONS } from "../data.js";
+import { CROPS, LAND_OPTIONS, findCrop } from "../data.js";
 import { saveGame } from "../state.js";
 import { leaseLand, preparePlot, SOIL_LABELS, PREP_TIERS } from "../land.js";
-import { plantCrop, tendPlot, harvestPlot, isMature, SEED_TIERS } from "../crops.js";
+import { plantCrop, tendPlot, harvestPlot, isMature, SEED_TIERS, MAX_TENDS_PER_CYCLE } from "../crops.js";
 import { navBar } from "./nav.js";
 
 export function landScreen(state, navigate) {
@@ -123,7 +123,7 @@ export function landScreen(state, navigate) {
         );
       }
     } else if (isMature(plot)) {
-      const crop = CROPS.find((c) => c.id === plot.crop.cropId);
+      const crop = findCrop(plot.crop.cropId);
       body.push(
         el("p", { class: "status-ready" }, [`${crop.name} is ready to harvest!`]),
         el(
@@ -133,7 +133,7 @@ export function landScreen(state, navigate) {
         )
       );
     } else {
-      const crop = CROPS.find((c) => c.id === plot.crop.cropId);
+      const crop = findCrop(plot.crop.cropId);
       const pct = Math.min(100, Math.round((plot.crop.daysGrown / crop.cycleDays) * 100));
       body.push(
         el("p", {}, [`Growing ${crop.name} — day ${plot.crop.daysGrown}/${crop.cycleDays}`]),
@@ -149,7 +149,7 @@ export function landScreen(state, navigate) {
             type: "button",
             onClick: () => doAction(tendPlot, plotIndex),
           },
-          [`Tend (${plot.crop.tendCount}/3 used)`]
+          [`Tend (${plot.crop.tendCount}/${MAX_TENDS_PER_CYCLE} used)`]
         )
       );
     }

@@ -6,7 +6,7 @@ export const SEED_TIERS = {
 };
 
 const MIN_READINESS_TO_PLANT = 30;
-const MAX_TENDS_PER_CYCLE = 3;
+export const MAX_TENDS_PER_CYCLE = 3;
 const READINESS_CARRYOVER = 0.4;
 
 export function plantCrop(state, plotIndex, cropId, seedTierId) {

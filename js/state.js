@@ -70,11 +70,22 @@ export function saveGame(state) {
   localStorage.setItem(CONFIG.saveKey, JSON.stringify(state));
 }
 
+/**
+ * Backfills fields that didn't exist in older save versions, so a save
+ * made before a schema addition (e.g. `land`/`inventory`) still loads
+ * instead of crashing the first screen that reads the missing field.
+ */
+function withDefaults(state) {
+  if (!state.land) state.land = [];
+  if (!state.inventory) state.inventory = {};
+  return state;
+}
+
 export function loadGame() {
   const raw = localStorage.getItem(CONFIG.saveKey);
   if (!raw) return null;
   try {
-    return JSON.parse(raw);
+    return withDefaults(JSON.parse(raw));
   } catch (err) {
     console.error("Corrupt save data", err);
     return null;

@@ -19,6 +19,16 @@ export function bankScreen(state, navigate) {
   const screen = el("div", { class: "screen bank-screen" });
   let buying = false;
   let retryInFlight = false;
+  // Flips false once the player navigates away from this screen instance,
+  // so an async continuation (the retry below, or the buy handler further
+  // down) that resolves after that doesn't call redraw() on a now-
+  // detached DOM node. State changes (saveGame/pushLog) still apply either
+  // way — this only guards the redraw.
+  let active = true;
+  const leavingNavigate = (nextId) => {
+    active = false;
+    navigate(nextId);
+  };
 
   // retryInitIfNeeded() guards its own one-retry-per-session limit (see
   // js/vatar.js) and syncs Premium ownership too if the retry succeeds —
@@ -33,7 +43,7 @@ export function bankScreen(state, navigate) {
         pushLog(state, "Premium Pass unlocked! ✨");
         saveGame(state);
       }
-      redraw();
+      if (active) redraw();
     });
   }
 
@@ -69,13 +79,13 @@ export function bankScreen(state, navigate) {
               buying = false;
               if (!result.ok) {
                 toast(result.message);
-                redraw();
+                if (active) redraw();
                 return;
               }
               state.premium = true;
               pushLog(state, "Bought the Premium Pass! ✨");
               saveGame(state);
-              redraw();
+              if (active) redraw();
             },
           },
           [buying ? "Opening pay sheet…" : "Buy Premium Pass"]
@@ -120,7 +130,7 @@ export function bankScreen(state, navigate) {
     ]);
 
     screen.appendChild(el("h1", {}, ["Bank"]));
-    screen.appendChild(navBar("bank", navigate));
+    screen.appendChild(navBar("bank", leavingNavigate));
     screen.appendChild(summary);
     screen.appendChild(renderPremiumCard());
     screen.appendChild(ledger);

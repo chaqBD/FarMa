@@ -19,6 +19,18 @@ const SCREENS = {
 
 let currentScreenId = "home";
 
+// How long start() waits for an embedded Vatar handshake before giving up
+// on it for *first render only* and proceeding as if standalone. The real
+// initVatar() call keeps running after this — if it resolves late,
+// initVatar() still caches the result, so isEmbeddedInLagosLife() picks
+// it up correctly from then on (and the Bank screen's own retry can
+// still pick up a case this timeout causes to be missed).
+const VATAR_INIT_TIMEOUT_MS = 6000;
+
+function withTimeout(promise, ms, fallbackValue) {
+  return Promise.race([promise, new Promise((resolve) => setTimeout(() => resolve(fallbackValue), ms))]);
+}
+
 function showScreen(state, screenId) {
   currentScreenId = screenId;
   const navigate = (nextId) => showScreen(state, nextId);
@@ -58,8 +70,10 @@ async function start() {
   // embedded session waits here, for the handshake with the Lagos Life
   // frame — worth it so every screen's first render already knows
   // whether it's embedded, instead of guessing standalone and
-  // correcting itself a moment later.
-  const vatarInfo = await initVatar();
+  // correcting itself a moment later. Capped so a handshake that never
+  // settles (dropped postMessage, unresponsive parent frame) can't hang
+  // the whole app — proceeds as standalone for first render either way.
+  const vatarInfo = await withTimeout(initVatar(), VATAR_INIT_TIMEOUT_MS, null);
 
   const existingSave = loadGame();
   if (existingSave) {

@@ -1,4 +1,4 @@
-import { el, formatNaira, toast } from "../ui.js";
+import { el, formatNaira, toast, icon } from "../ui.js";
 import { CROPS, LAND_OPTIONS, findCrop } from "../data.js";
 import { saveGame } from "../state.js";
 import { leaseLand, preparePlot, SOIL_LABELS, PREP_TIERS } from "../land.js";
@@ -31,9 +31,9 @@ export function landScreen(state, navigate) {
     return el("div", { class: "card-grid" }, [
       ...LAND_OPTIONS.map((option) =>
         el("div", { class: "card land-option-card" }, [
-          el("h3", {}, [option.label]),
+          el("div", { class: "card-title-row" }, [icon("logo", 32), el("h3", {}, [option.label])]),
           el("p", { class: "muted" }, [option.areaLabel, ` · ${option.plots} plot${option.plots > 1 ? "s" : ""}`]),
-          el("p", { class: "muted" }, ["Soils: " + option.soils.map((s) => SOIL_LABELS[s]).join(", ")]),
+          el("div", { class: "soil-chip-row" }, option.soils.map((s) => el("span", { class: "soil-chip" }, [icon(s, 20), SOIL_LABELS[s]]))),
           el("p", { class: "cash" }, [formatNaira(option.leaseCost)]),
           el(
             "button",
@@ -46,11 +46,27 @@ export function landScreen(state, navigate) {
   }
 
   function renderPlantForm(plotIndex, plot) {
-    const cropSelect = el(
-      "select",
-      {},
-      CROPS.map((c) => el("option", { value: c.id }, [`${c.name} (${soilFitLabel(c, plot.soil)})`]))
-    );
+    let selectedCropId = CROPS[0].id;
+    const cropPicker = el("div", { class: "crop-picker" });
+
+    function drawCropPicker() {
+      cropPicker.innerHTML = "";
+      for (const c of CROPS) {
+        const fit = soilFitLabel(c, plot.soil);
+        const chip = el(
+          "button",
+          {
+            type: "button",
+            class: "crop-chip" + (c.id === selectedCropId ? " selected" : "") + " fit-" + fit.replace(" ", "-"),
+            onClick: () => { selectedCropId = c.id; drawCropPicker(); },
+          },
+          [icon(c.id, 32), el("span", {}, [c.name]), el("span", { class: "fit-label" }, [fit])]
+        );
+        cropPicker.appendChild(chip);
+      }
+    }
+    drawCropPicker();
+
     const seedSelect = el(
       "select",
       {},
@@ -60,7 +76,7 @@ export function landScreen(state, navigate) {
     );
 
     return el("div", { class: "plant-form" }, [
-      el("label", {}, ["Crop", cropSelect]),
+      el("label", {}, ["Crop", cropPicker]),
       el("label", {}, ["Seed", seedSelect]),
       el("div", { class: "button-row" }, [
         el(
@@ -68,7 +84,7 @@ export function landScreen(state, navigate) {
           {
             class: "primary-btn",
             type: "button",
-            onClick: () => doAction(plantCrop, plotIndex, cropSelect.value, seedSelect.value),
+            onClick: () => doAction(plantCrop, plotIndex, selectedCropId, seedSelect.value),
           },
           ["Plant"]
         ),
@@ -83,8 +99,13 @@ export function landScreen(state, navigate) {
 
   function renderPlotCard(plot, plotIndex) {
     const body = [
-      el("h3", {}, [`Plot ${plotIndex + 1}`]),
-      el("p", { class: "muted" }, [SOIL_LABELS[plot.soil]]),
+      el("div", { class: "card-title-row" }, [
+        icon(plot.soil, 32),
+        el("div", {}, [
+          el("h3", {}, [`Plot ${plotIndex + 1}`]),
+          el("p", { class: "muted plot-soil-label" }, [SOIL_LABELS[plot.soil]]),
+        ]),
+      ]),
       el("div", { class: "stat-bar" }, [
         el("span", { class: "stat-label" }, ["Readiness"]),
         el("div", { class: "stat-track" }, [el("div", { class: "stat-fill", style: `width:${plot.readiness}%` })]),
@@ -125,7 +146,7 @@ export function landScreen(state, navigate) {
     } else if (isMature(plot)) {
       const crop = findCrop(plot.crop.cropId);
       body.push(
-        el("p", { class: "status-ready" }, [`${crop.name} is ready to harvest!`]),
+        el("div", { class: "crop-row" }, [icon(crop.id, 36), el("p", { class: "status-ready" }, [`${crop.name} is ready to harvest!`])]),
         el(
           "button",
           { class: "primary-btn", type: "button", onClick: () => doAction(harvestPlot, plotIndex) },
@@ -136,7 +157,7 @@ export function landScreen(state, navigate) {
       const crop = findCrop(plot.crop.cropId);
       const pct = Math.min(100, Math.round((plot.crop.daysGrown / crop.cycleDays) * 100));
       body.push(
-        el("p", {}, [`Growing ${crop.name} — day ${plot.crop.daysGrown}/${crop.cycleDays}`]),
+        el("div", { class: "crop-row" }, [icon(crop.id, 36), el("p", {}, [`Growing ${crop.name} — day ${plot.crop.daysGrown}/${crop.cycleDays}`])]),
         el("div", { class: "stat-bar" }, [
           el("span", { class: "stat-label" }, ["Growth"]),
           el("div", { class: "stat-track" }, [el("div", { class: "stat-fill growth", style: `width:${pct}%` })]),

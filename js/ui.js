@@ -1,3 +1,5 @@
+import { iconHtml } from "./icons.js";
+
 /** Tiny DOM helper: el("div", {class: "card"}, ["text", el("span", {}, ["x"])]) */
 export function el(tag, props = {}, children = []) {
   const node = document.createElement(tag);
@@ -16,6 +18,11 @@ export function el(tag, props = {}, children = []) {
     node.appendChild(typeof child === "string" ? document.createTextNode(child) : child);
   }
   return node;
+}
+
+/** A small inline-SVG icon badge; see js/icons.js for the available names. */
+export function icon(name, size = 28) {
+  return el("span", { class: "icon", style: `width:${size}px;height:${size}px`, html: iconHtml(name) });
 }
 
 export function formatNaira(amount) {

@@ -118,6 +118,14 @@ h1, h2, h3 { margin: 0 0 8px; font-family: var(--font-display); }
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
   border: 3px solid var(--card-bg);
 }
+.premium-badge { font-size: 0.9em; }
+.dash-header.premium .cash-display { background: linear-gradient(135deg, #b8860b, var(--soil)); }
+.dash-header.premium h1 { color: #9a6c00; }
+
+.premium-card { border: 2px solid #f4c542; background: linear-gradient(135deg, #fffdf5, var(--card-bg)); }
+.premium-card.premium-owned { border-color: var(--green); background: linear-gradient(135deg, #effaf1, var(--card-bg)); }
+.premium-card .primary-btn:disabled { opacity: 0.6; cursor: wait; }
+
 .avatar-badge {
   width: 44px;
   height: 44px;

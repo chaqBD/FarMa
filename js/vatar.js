@@ -201,13 +201,26 @@ let syncPromise = null; // dedups the whole init-then-sync flow, same reasoning 
 export function ensureVatarSynced(state) {
   if (!syncPromise) {
     syncPromise = (async () => {
-      const info = await initVatar();
-      if (!info) {
-        syncPromise = null;
+      try {
+        const info = await initVatar();
+        if (!info) return { embedded: false, premiumChanged: false };
+        const premiumChanged = await syncPremiumFromVatar(state);
+        return { embedded: true, premiumChanged };
+      } catch (err) {
+        // Not just an init() failure (which initVatar() itself already
+        // handles without throwing) — this also covers the entitlement
+        // check throwing after a *successful* init (e.g. the fetch in
+        // checkPremiumEntitlement's callFunction rejecting outright,
+        // which isn't try/caught there). Without resetting here too,
+        // that leaves this cached rejected promise permanently disabling
+        // every future sync this session, even though init itself is
+        // fine — exactly the "not cached permanently" guarantee this
+        // function documents above.
+        console.warn("ensureVatarSynced failed:", err);
         return { embedded: false, premiumChanged: false };
+      } finally {
+        syncPromise = null;
       }
-      const premiumChanged = await syncPremiumFromVatar(state);
-      return { embedded: true, premiumChanged };
     })();
   }
   return syncPromise;

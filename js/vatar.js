@@ -74,12 +74,19 @@ async function claimPurchase(purchaseId) {
   return callFunction("/claim", { session, purchaseId });
 }
 
-/** Checks whether this Vatar player already owns the Premium Pass, independent of this device's local save. */
+/**
+ * Checks whether this Vatar player already owns the Premium Pass,
+ * independent of this device's local save. `available: false` means we
+ * couldn't get a definitive answer (no session, or the request failed) —
+ * callers must treat that as "unknown", never as "confirmed not premium",
+ * so a transient network/server hiccup can never downgrade a player who
+ * already owns the pass.
+ */
 export async function checkPremiumEntitlement() {
   const session = await freshSession();
   if (!session) return { available: false, premium: false };
   const result = await callFunction("/entitlement", { session });
-  if (!result.ok) return { available: true, premium: false };
+  if (!result.ok) return { available: false, premium: false };
   return { available: true, premium: Boolean(result.data.premium) };
 }
 

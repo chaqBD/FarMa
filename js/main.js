@@ -29,12 +29,18 @@ function showScreen(state, screenId) {
 /**
  * Syncs Premium Pass status from Vatar in the background, after the game
  * has already rendered — this never blocks first paint, and is a silent
- * no-op when FaRma is played standalone outside Lagos Life. Always
- * redraws the current screen once Vatar finishes initializing (not only
- * when state.premium changes): the Bank screen's UI also depends on
- * isEmbeddedInLagosLife(), which flips from unknown to known right here,
- * and that transition needs to reach the screen even on a run where the
- * player doesn't already own the pass.
+ * no-op when FaRma is played standalone outside Lagos Life.
+ *
+ * Redraws are deliberately narrow: a full redraw tears down and rebuilds
+ * the current screen's DOM (render() does innerHTML = ""), which would
+ * wipe any in-progress, unsaved form input (e.g. a quantity field on
+ * Market) if it fired on every embedded load. So this only redraws when
+ * state.premium actually changed (affects the dashboard's badge), or
+ * when the player is already looking at the Bank screen, whose "Buy
+ * Premium Pass" vs "open inside Lagos Life" UI depends on
+ * isEmbeddedInLagosLife() itself, not just state.premium — that flips
+ * from unknown to known right here even on a run where premium stays
+ * false, and the Bank screen has no in-progress form input to lose.
  */
 async function syncPremiumStatus(state) {
   const vatarInfo = await initVatar();
@@ -42,11 +48,16 @@ async function syncPremiumStatus(state) {
 
   await restoreInterruptedPurchases();
   const { available, premium } = await checkPremiumEntitlement();
+
+  let premiumChanged = false;
   if (available && premium !== state.premium) {
     state.premium = premium;
     if (premium) pushLog(state, "Premium Pass unlocked! ✨");
     saveGame(state);
+    premiumChanged = true;
   }
+
+  if (!premiumChanged && currentScreenId !== "bank") return;
   showScreen(state, currentScreenId);
 }
 

@@ -8,6 +8,9 @@ const TYPE_LABELS = {
   seed: "Seed",
   tending: "Tending",
   sale: "Sale",
+  event: "Event",
+  hiring: "Hiring",
+  wages: "Wages",
 };
 
 export function bankScreen(state, navigate) {

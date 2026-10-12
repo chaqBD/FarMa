@@ -236,6 +236,11 @@ input, select {
 .price-table td, .price-table th, .ledger-table td { padding: 4px 6px; border-bottom: 1px solid #efe8d9; }
 .price-table th { text-align: left; color: var(--muted); font-weight: 600; }
 .net-cell { font-weight: 600; color: var(--soil); }
+
+/* Workers */
+.worker-card { display: flex; flex-direction: column; gap: 8px; }
+.worker-card label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+.hire-card .cash { color: var(--orange); font-weight: bold; margin: 4px 0; }
 .ledger-table td:last-child { text-align: right; font-weight: 600; }
 .cash.positive, .positive { color: var(--green); }
 .cash.negative, .negative { color: var(--danger); }
